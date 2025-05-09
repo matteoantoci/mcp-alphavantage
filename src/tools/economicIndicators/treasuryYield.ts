@@ -5,8 +5,7 @@ const treasuryYieldInputSchemaShape = {
     .describe('daily, weekly, or monthly (default: monthly)'),
   maturity: z.enum(['3month', '2year', '5year', '7year', '10year', '30year']).optional().default('10year')
     .describe('3month, 2year, 5year, 7year, 10year, or 30year (default: 10year)'),
-  datatype: z.enum(['json', 'csv']).optional().default('json')
-    .describe('json or csv (default: json)'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof treasuryYieldInputSchemaShape;
@@ -14,21 +13,23 @@ type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any;
 
 const treasuryYieldHandler = async (input: Input, apiKey: string): Promise<Output> => {
-  const { interval, maturity, datatype } = input;
+  // Removed datatype from input destructuring
+  const { interval, maturity } = input;
   const params = new URLSearchParams({
     function: 'TREASURY_YIELD',
     apikey: apiKey,
     interval,
     maturity,
-    datatype,
+    datatype: 'json', // Hardcoded datatype to 'json'
   });
   const url = `https://www.alphavantage.co/query?${params.toString()}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`API request failed: ${response.statusText}`);
-  if (datatype === 'csv') return { data: await response.text(), format: 'csv' };
+  // Removed CSV handling logic
   const data = await response.json();
   if (data['Error Message']) throw new Error(data['Error Message']);
-  return { data, format: 'json' };
+  // Return raw data, wrapping is handled by wrapToolHandler
+  return data;
 };
 
 type AlphaVantageToolDefinition = {

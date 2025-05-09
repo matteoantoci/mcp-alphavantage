@@ -1,4 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { wrapToolHandler } from '../wrapToolHandler.js'; // Import the wrapper
 // Import individual tool definitions for options
 import { historicalOptionsTool } from './historicalOptions.js';
 
@@ -14,7 +15,7 @@ export const registerOptionsTools = (server: McpServer, apiKey: string): void =>
     historicalOptionsTool.name,
     historicalOptionsTool.description,
     historicalOptionsTool.inputSchemaShape,
-    (input) => historicalOptionsTool.handler(input, apiKey)
+    wrapToolHandler((input) => historicalOptionsTool.handler(input, apiKey))
   );
 
   console.log('Finished registering Alpha Vantage Options tools.');

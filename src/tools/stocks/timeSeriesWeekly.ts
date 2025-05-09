@@ -3,11 +3,7 @@ import { z } from 'zod';
 // Define the input schema shape for the TIME_SERIES_WEEKLY tool
 const timeSeriesWeeklyInputSchemaShape = {
   symbol: z.string().describe('The name of the equity of your choice. For example: IBM'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof timeSeriesWeeklyInputSchemaShape;
@@ -17,14 +13,15 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the TIME_SERIES_WEEKLY tool
 const timeSeriesWeeklyHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbol, datatype } = input;
+    // Removed datatype from input destructuring
+    const { symbol } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
       function: 'TIME_SERIES_WEEKLY',
       symbol,
       apikey: apiKey,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     const url = `${baseUrl}?${params.toString()}`;
@@ -35,11 +32,7 @@ const timeSeriesWeeklyHandler = async (input: Input, apiKey: string): Promise<Ou
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -52,10 +45,12 @@ const timeSeriesWeeklyHandler = async (input: Input, apiKey: string): Promise<Ou
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('TIME_SERIES_WEEKLY tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`TIME_SERIES_WEEKLY tool failed: ${message}`);
   }
 };

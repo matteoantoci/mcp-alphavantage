@@ -12,11 +12,7 @@ const rsiInputSchemaShape = {
     .describe('Query a specific month in history (YYYY-MM format). ONLY applicable to intraday intervals.'),
   time_period: z.number().int().positive().describe('Number of data points used to calculate each RSI value.'),
   series_type: z.enum(['close', 'open', 'high', 'low']).describe('The desired price type in the time series.'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof rsiInputSchemaShape;
@@ -26,7 +22,8 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the RSI tool
 const rsiHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbol, interval, month, time_period, series_type, datatype } = input;
+    // Removed datatype from input destructuring
+    const { symbol, interval, month, time_period, series_type } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
@@ -36,7 +33,7 @@ const rsiHandler = async (input: Input, apiKey: string): Promise<Output> => {
       time_period: time_period.toString(),
       series_type,
       apikey: apiKey,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     if (month) {
@@ -51,11 +48,7 @@ const rsiHandler = async (input: Input, apiKey: string): Promise<Output> => {
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -68,10 +61,12 @@ const rsiHandler = async (input: Input, apiKey: string): Promise<Output> => {
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('RSI tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`RSI tool failed: ${message}`);
   }
 };

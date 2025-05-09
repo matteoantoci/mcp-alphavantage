@@ -4,11 +4,7 @@ import { z } from 'zod';
 const earningsCallTranscriptInputSchemaShape = {
   symbol: z.string().describe('The symbol of the ticker of your choice. For example: IBM.'),
   quarter: z.string().describe('Fiscal quarter in YYYYQM format. For example: 2024Q1.'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof earningsCallTranscriptInputSchemaShape;
@@ -18,7 +14,8 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the EARNINGS_CALL_TRANSCRIPT tool
 const earningsCallTranscriptHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbol, quarter, datatype } = input;
+    // Removed datatype from input destructuring
+    const { symbol, quarter } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
@@ -26,7 +23,7 @@ const earningsCallTranscriptHandler = async (input: Input, apiKey: string): Prom
       symbol,
       quarter,
       apikey: apiKey,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     const url = `${baseUrl}?${params.toString()}`;
@@ -37,11 +34,7 @@ const earningsCallTranscriptHandler = async (input: Input, apiKey: string): Prom
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -54,10 +47,12 @@ const earningsCallTranscriptHandler = async (input: Input, apiKey: string): Prom
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('EARNINGS_CALL_TRANSCRIPT tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`EARNINGS_CALL_TRANSCRIPT tool failed: ${message}`);
   }
 };

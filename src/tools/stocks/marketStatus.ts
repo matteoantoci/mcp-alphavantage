@@ -32,10 +32,12 @@ const marketStatusHandler = async (apiKey: string): Promise<Output> => {
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('MARKET_STATUS tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`MARKET_STATUS tool failed: ${message}`);
   }
 };

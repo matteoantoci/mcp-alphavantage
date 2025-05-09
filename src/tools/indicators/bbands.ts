@@ -22,11 +22,7 @@ const bbandsInputSchemaShape = {
     .optional()
     .default(0)
     .describe('Moving average type of the time series (0=SMA, 1=EMA, etc.).'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof bbandsInputSchemaShape;
@@ -36,7 +32,8 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the BBANDS tool
 const bbandsHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbol, interval, month, time_period, series_type, nbdevup, nbdevdn, matype, datatype } = input;
+    // Removed datatype from input destructuring
+    const { symbol, interval, month, time_period, series_type, nbdevup, nbdevdn, matype } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
@@ -49,7 +46,7 @@ const bbandsHandler = async (input: Input, apiKey: string): Promise<Output> => {
       nbdevup: nbdevup.toString(),
       nbdevdn: nbdevdn.toString(),
       matype: matype.toString(),
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     if (month) {
@@ -64,11 +61,7 @@ const bbandsHandler = async (input: Input, apiKey: string): Promise<Output> => {
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -81,10 +74,12 @@ const bbandsHandler = async (input: Input, apiKey: string): Promise<Output> => {
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('BBANDS tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`BBANDS tool failed: ${message}`);
   }
 };

@@ -17,11 +17,7 @@ const newsSentimentInputSchemaShape = {
     .optional()
     .default(50)
     .describe('Maximum number of articles to return (up to 1000).'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof newsSentimentInputSchemaShape;
@@ -31,7 +27,8 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the NEWS_SENTIMENT tool
 const newsSentimentHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { tickers, topics, time_from, time_to, sort, limit, datatype } = input;
+    // Removed datatype from input destructuring
+    const { tickers, topics, time_from, time_to, sort, limit } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
@@ -39,7 +36,7 @@ const newsSentimentHandler = async (input: Input, apiKey: string): Promise<Outpu
       apikey: apiKey,
       sort,
       limit: limit.toString(),
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     if (tickers) {
@@ -63,11 +60,7 @@ const newsSentimentHandler = async (input: Input, apiKey: string): Promise<Outpu
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -80,10 +73,12 @@ const newsSentimentHandler = async (input: Input, apiKey: string): Promise<Outpu
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('NEWS_SENTIMENT tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`NEWS_SENTIMENT tool failed: ${message}`);
   }
 };

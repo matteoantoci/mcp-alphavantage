@@ -47,11 +47,7 @@ const stochInputSchemaShape = {
     .optional()
     .default(0)
     .describe('Moving average type for the slowd moving average (0=SMA, 1=EMA, etc.).'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof stochInputSchemaShape;
@@ -61,7 +57,8 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the STOCH tool
 const stochHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbol, interval, month, fastkperiod, slowkperiod, slowdperiod, slowkmatype, slowdmatype, datatype } =
+    // Removed datatype from input destructuring
+    const { symbol, interval, month, fastkperiod, slowkperiod, slowdperiod, slowkmatype, slowdmatype } =
       input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
@@ -75,7 +72,7 @@ const stochHandler = async (input: Input, apiKey: string): Promise<Output> => {
       slowdperiod: slowdperiod.toString(),
       slowkmatype: slowkmatype.toString(),
       slowdmatype: slowdmatype.toString(),
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     if (month) {
@@ -90,11 +87,7 @@ const stochHandler = async (input: Input, apiKey: string): Promise<Output> => {
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -107,10 +100,12 @@ const stochHandler = async (input: Input, apiKey: string): Promise<Output> => {
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('STOCH tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`STOCH tool failed: ${message}`);
   }
 };

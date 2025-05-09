@@ -1,4 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { wrapToolHandler } from '../wrapToolHandler.js'; // Import the wrapper
 // Import individual tool definitions for fundamentals
 import { companyOverviewTool } from './companyOverview.js';
 import { etfProfileTool } from './etfProfile.js';
@@ -24,43 +25,67 @@ export const registerFundamentalsTools = (server: McpServer, apiKey: string): vo
     companyOverviewTool.name,
     companyOverviewTool.description,
     companyOverviewTool.inputSchemaShape,
-    (input) => companyOverviewTool.handler(input, apiKey)
+    wrapToolHandler((input) => companyOverviewTool.handler(input, apiKey))
   );
-  server.tool(etfProfileTool.name, etfProfileTool.description, etfProfileTool.inputSchemaShape, (input) =>
-    etfProfileTool.handler(input, apiKey)
+  server.tool(
+    etfProfileTool.name,
+    etfProfileTool.description,
+    etfProfileTool.inputSchemaShape,
+    wrapToolHandler((input) => etfProfileTool.handler(input, apiKey))
   );
-  server.tool(dividendsTool.name, dividendsTool.description, dividendsTool.inputSchemaShape, (input) =>
-    dividendsTool.handler(input, apiKey)
+  server.tool(
+    dividendsTool.name,
+    dividendsTool.description,
+    dividendsTool.inputSchemaShape,
+    wrapToolHandler((input) => dividendsTool.handler(input, apiKey))
   );
-  server.tool(splitsTool.name, splitsTool.description, splitsTool.inputSchemaShape, (input) =>
-    splitsTool.handler(input, apiKey)
+  server.tool(
+    splitsTool.name,
+    splitsTool.description,
+    splitsTool.inputSchemaShape,
+    wrapToolHandler((input) => splitsTool.handler(input, apiKey))
   );
   server.tool(
     incomeStatementTool.name,
     incomeStatementTool.description,
     incomeStatementTool.inputSchemaShape,
-    (input) => incomeStatementTool.handler(input, apiKey)
+    wrapToolHandler((input) => incomeStatementTool.handler(input, apiKey))
   );
-  server.tool(balanceSheetTool.name, balanceSheetTool.description, balanceSheetTool.inputSchemaShape, (input) =>
-    balanceSheetTool.handler(input, apiKey)
+  server.tool(
+    balanceSheetTool.name,
+    balanceSheetTool.description,
+    balanceSheetTool.inputSchemaShape,
+    wrapToolHandler((input) => balanceSheetTool.handler(input, apiKey))
   );
-  server.tool(cashFlowTool.name, cashFlowTool.description, cashFlowTool.inputSchemaShape, (input) =>
-    cashFlowTool.handler(input, apiKey)
+  server.tool(
+    cashFlowTool.name,
+    cashFlowTool.description,
+    cashFlowTool.inputSchemaShape,
+    wrapToolHandler((input) => cashFlowTool.handler(input, apiKey))
   );
-  server.tool(earningsTool.name, earningsTool.description, earningsTool.inputSchemaShape, (input) =>
-    earningsTool.handler(input, apiKey)
+  server.tool(
+    earningsTool.name,
+    earningsTool.description,
+    earningsTool.inputSchemaShape,
+    wrapToolHandler((input) => earningsTool.handler(input, apiKey))
   );
-  server.tool(listingStatusTool.name, listingStatusTool.description, listingStatusTool.inputSchemaShape, (input) =>
-    listingStatusTool.handler(input, apiKey)
+  server.tool(
+    listingStatusTool.name,
+    listingStatusTool.description,
+    listingStatusTool.inputSchemaShape,
+    wrapToolHandler((input) => listingStatusTool.handler(input, apiKey))
   );
   server.tool(
     earningsCalendarTool.name,
     earningsCalendarTool.description,
     earningsCalendarTool.inputSchemaShape,
-    (input) => earningsCalendarTool.handler(input, apiKey)
+    wrapToolHandler((input) => earningsCalendarTool.handler(input, apiKey))
   );
-  server.tool(ipoCalendarTool.name, ipoCalendarTool.description, ipoCalendarTool.inputSchemaShape, (input) =>
-    ipoCalendarTool.handler(input, apiKey)
+  server.tool(
+    ipoCalendarTool.name,
+    ipoCalendarTool.description,
+    ipoCalendarTool.inputSchemaShape,
+    wrapToolHandler((input) => ipoCalendarTool.handler(input, apiKey))
   );
 
   console.log('Finished registering Alpha Vantage Fundamentals tools.');

@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 const unemploymentInputSchemaShape = {
-  datatype: z.enum(['json', 'csv']).optional().default('json')
-    .describe('json or csv (default: json)'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof unemploymentInputSchemaShape;
@@ -10,19 +9,21 @@ type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any;
 
 const unemploymentHandler = async (input: Input, apiKey: string): Promise<Output> => {
-  const { datatype } = input;
+  // Removed datatype from input destructuring
+  const { } = input; // No required parameters left
   const params = new URLSearchParams({
     function: 'UNEMPLOYMENT',
     apikey: apiKey,
-    datatype,
+    datatype: 'json', // Hardcoded datatype to 'json'
   });
   const url = `https://www.alphavantage.co/query?${params.toString()}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`API request failed: ${response.statusText}`);
-  if (datatype === 'csv') return { data: await response.text(), format: 'csv' };
+  // Removed CSV handling logic
   const data = await response.json();
   if (data['Error Message']) throw new Error(data['Error Message']);
-  return { data, format: 'json' };
+  // Return raw data, wrapping is handled by wrapToolHandler
+  return data;
 };
 
 type AlphaVantageToolDefinition = {

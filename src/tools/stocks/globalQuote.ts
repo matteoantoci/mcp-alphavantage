@@ -3,11 +3,7 @@ import { z } from 'zod';
 // Define the input schema shape for the GLOBAL_QUOTE tool
 const globalQuoteInputSchemaShape = {
   symbol: z.string().describe('The symbol of the global ticker of your choice. For example: IBM.'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof globalQuoteInputSchemaShape;
@@ -17,14 +13,15 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the GLOBAL_QUOTE tool
 const globalQuoteHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbol, datatype } = input;
+    // Removed datatype from input destructuring
+    const { symbol } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
       function: 'GLOBAL_QUOTE',
       symbol,
       apikey: apiKey,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     const url = `${baseUrl}?${params.toString()}`;
@@ -35,11 +32,7 @@ const globalQuoteHandler = async (input: Input, apiKey: string): Promise<Output>
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -52,10 +45,12 @@ const globalQuoteHandler = async (input: Input, apiKey: string): Promise<Output>
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('GLOBAL_QUOTE tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`GLOBAL_QUOTE tool failed: ${message}`);
   }
 };

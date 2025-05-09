@@ -2,11 +2,7 @@ import { z } from 'zod';
 
 // Define the input schema shape for the IPO_CALENDAR tool
 const ipoCalendarInputSchemaShape = {
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('csv')
-    .describe('By default, csv. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof ipoCalendarInputSchemaShape;
@@ -16,13 +12,14 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the IPO_CALENDAR tool
 const ipoCalendarHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { datatype } = input;
+    // Removed datatype from input destructuring
+    const { } = input; // No required parameters left
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
       function: 'IPO_CALENDAR',
       apikey: apiKey,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     const url = `${baseUrl}?${params.toString()}`;
@@ -33,11 +30,7 @@ const ipoCalendarHandler = async (input: Input, apiKey: string): Promise<Output>
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -50,10 +43,12 @@ const ipoCalendarHandler = async (input: Input, apiKey: string): Promise<Output>
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('IPO_CALENDAR tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`IPO_CALENDAR tool failed: ${message}`);
   }
 };

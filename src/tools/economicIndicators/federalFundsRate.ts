@@ -3,8 +3,7 @@ import { z } from 'zod';
 const federalFundsRateInputSchemaShape = {
   interval: z.enum(['daily', 'weekly', 'monthly']).optional().default('monthly')
     .describe('daily, weekly, or monthly (default: monthly)'),
-  datatype: z.enum(['json', 'csv']).optional().default('json')
-    .describe('json or csv (default: json)'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof federalFundsRateInputSchemaShape;
@@ -12,20 +11,22 @@ type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any;
 
 const federalFundsRateHandler = async (input: Input, apiKey: string): Promise<Output> => {
-  const { interval, datatype } = input;
+  // Removed datatype from input destructuring
+  const { interval } = input;
   const params = new URLSearchParams({
     function: 'FEDERAL_FUNDS_RATE',
     apikey: apiKey,
     interval,
-    datatype,
+    datatype: 'json', // Hardcoded datatype to 'json'
   });
   const url = `https://www.alphavantage.co/query?${params.toString()}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`API request failed: ${response.statusText}`);
-  if (datatype === 'csv') return { data: await response.text(), format: 'csv' };
+  // Removed CSV handling logic
   const data = await response.json();
   if (data['Error Message']) throw new Error(data['Error Message']);
-  return { data, format: 'json' };
+  // Return raw data, wrapping is handled by wrapToolHandler
+  return data;
 };
 
 type AlphaVantageToolDefinition = {

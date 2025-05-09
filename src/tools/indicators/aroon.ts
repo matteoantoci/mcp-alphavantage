@@ -11,11 +11,7 @@ const aroonInputSchemaShape = {
     .optional()
     .describe('Query a specific month in history (YYYY-MM format). ONLY applicable to intraday intervals.'),
   time_period: z.number().int().positive().describe('Number of data points used to calculate each AROON value.'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof aroonInputSchemaShape;
@@ -25,7 +21,8 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the AROON tool
 const aroonHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbol, interval, month, time_period, datatype } = input;
+    // Removed datatype from input destructuring
+    const { symbol, interval, month, time_period } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
@@ -34,7 +31,7 @@ const aroonHandler = async (input: Input, apiKey: string): Promise<Output> => {
       interval,
       time_period: time_period.toString(),
       apikey: apiKey,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     if (month) {
@@ -49,11 +46,7 @@ const aroonHandler = async (input: Input, apiKey: string): Promise<Output> => {
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -66,10 +59,12 @@ const aroonHandler = async (input: Input, apiKey: string): Promise<Output> => {
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('AROON tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`AROON tool failed: ${message}`);
   }
 };

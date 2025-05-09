@@ -13,11 +13,7 @@ const listingStatusInputSchemaShape = {
     .optional()
     .default('active')
     .describe('By default, active. Set to delisted to query delisted assets.'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('csv')
-    .describe('By default, csv. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof listingStatusInputSchemaShape;
@@ -27,14 +23,15 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the LISTING_STATUS tool
 const listingStatusHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { date, state, datatype } = input;
+    // Removed datatype from input destructuring
+    const { date, state } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
       function: 'LISTING_STATUS',
       apikey: apiKey,
       state,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     if (date) {
@@ -49,11 +46,7 @@ const listingStatusHandler = async (input: Input, apiKey: string): Promise<Outpu
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -66,10 +59,12 @@ const listingStatusHandler = async (input: Input, apiKey: string): Promise<Outpu
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('LISTING_STATUS tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`LISTING_STATUS tool failed: ${message}`);
   }
 };

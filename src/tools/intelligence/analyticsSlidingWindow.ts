@@ -28,11 +28,7 @@ const analyticsSlidingWindowInputSchemaShape = {
     .min(10)
     .describe('An integer representing the size of the moving window (minimum 10).'),
   calculations: z.string().array().min(1).describe('A comma separated list of the analytics metrics to calculate.'),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof analyticsSlidingWindowInputSchemaShape;
@@ -42,7 +38,8 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the ANALYTICS_SLIDING_WINDOW tool
 const analyticsSlidingWindowHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbols, range, interval, ohlc, window_size, calculations, datatype } = input;
+    // Removed datatype from input destructuring
+    const { symbols, range, interval, ohlc, window_size, calculations } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
@@ -53,7 +50,7 @@ const analyticsSlidingWindowHandler = async (input: Input, apiKey: string): Prom
       WINDOW_SIZE: window_size.toString(),
       CALCULATIONS: calculations.join(','), // Join array of calculations into comma-separated string
       apikey: apiKey,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     // Add range parameters - can be one or two
@@ -67,11 +64,7 @@ const analyticsSlidingWindowHandler = async (input: Input, apiKey: string): Prom
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -84,10 +77,12 @@ const analyticsSlidingWindowHandler = async (input: Input, apiKey: string): Prom
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('ANALYTICS_SLIDING_WINDOW tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`ANALYTICS_SLIDING_WINDOW tool failed: ${message}`);
   }
 };

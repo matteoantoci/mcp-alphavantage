@@ -9,11 +9,7 @@ const historicalOptionsInputSchemaShape = {
     .describe(
       'The date for which to retrieve options data (YYYY-MM-DD format). Defaults to the previous trading session.'
     ),
-  datatype: z
-    .enum(['json', 'csv'])
-    .optional()
-    .default('json')
-    .describe('By default, json. Strings json and csv are accepted.'),
+  // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof historicalOptionsInputSchemaShape;
@@ -23,14 +19,15 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 // Define the handler function for the HISTORICAL_OPTIONS tool
 const historicalOptionsHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    const { symbol, date, datatype } = input;
+    // Removed datatype from input destructuring
+    const { symbol, date } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
       function: 'HISTORICAL_OPTIONS',
       symbol,
       apikey: apiKey,
-      datatype,
+      datatype: 'json', // Hardcoded datatype to 'json'
     });
 
     if (date) {
@@ -45,11 +42,7 @@ const historicalOptionsHandler = async (input: Input, apiKey: string): Promise<O
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Handle CSV response
-    if (datatype === 'csv') {
-      const csvData = await response.text();
-      return { data: csvData, format: 'csv' };
-    }
+    // Removed CSV handling logic
 
     // Handle JSON response
     const data = await response.json();
@@ -62,10 +55,12 @@ const historicalOptionsHandler = async (input: Input, apiKey: string): Promise<O
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    return { data, format: 'json' };
+    // Return raw data, wrapping is handled by wrapToolHandler
+    return data;
   } catch (error: unknown) {
     console.error('HISTORICAL_OPTIONS tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
+    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`HISTORICAL_OPTIONS tool failed: ${message}`);
   }
 };
