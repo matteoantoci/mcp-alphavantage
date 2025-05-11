@@ -1,9 +1,15 @@
 import { z } from 'zod';
 
 const treasuryYieldInputSchemaShape = {
-  interval: z.enum(['daily', 'weekly', 'monthly']).optional().default('monthly')
+  interval: z
+    .enum(['daily', 'weekly', 'monthly'])
+    .optional()
+    .default('monthly')
     .describe('daily, weekly, or monthly (default: monthly)'),
-  maturity: z.enum(['3month', '2year', '5year', '7year', '10year', '30year']).optional().default('10year')
+  maturity: z
+    .enum(['3month', '2year', '5year', '7year', '10year', '30year'])
+    .optional()
+    .default('10year')
     .describe('3month, 2year, 5year, 7year, 10year, or 30year (default: 10year)'),
   // Removed datatype parameter
 };

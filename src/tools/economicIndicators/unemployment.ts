@@ -8,9 +8,8 @@ type RawSchemaShape = typeof unemploymentInputSchemaShape;
 type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any;
 
-const unemploymentHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const unemploymentHandler = async (_input: Input, apiKey: string): Promise<Output> => {
   // Removed datatype from input destructuring
-  const { } = input; // No required parameters left
   const params = new URLSearchParams({
     function: 'UNEMPLOYMENT',
     apikey: apiKey,

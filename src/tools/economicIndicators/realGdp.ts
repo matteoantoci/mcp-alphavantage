@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 const realGdpInputSchemaShape = {
-  interval: z.enum(['annual', 'quarterly']).optional().default('annual')
+  interval: z
+    .enum(['annual', 'quarterly'])
+    .optional()
+    .default('annual')
     .describe('annual or quarterly (default: annual)'),
   // Removed datatype parameter
 };

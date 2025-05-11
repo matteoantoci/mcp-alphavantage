@@ -58,8 +58,7 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 const stochHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
     // Removed datatype from input destructuring
-    const { symbol, interval, month, fastkperiod, slowkperiod, slowdperiod, slowkmatype, slowdmatype } =
-      input;
+    const { symbol, interval, month, fastkperiod, slowkperiod, slowdperiod, slowkmatype, slowdmatype } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({

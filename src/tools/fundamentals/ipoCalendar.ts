@@ -10,10 +10,9 @@ type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any; // TODO: Define a more specific output type based on Alpha Vantage response
 
 // Define the handler function for the IPO_CALENDAR tool
-const ipoCalendarHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const ipoCalendarHandler = async (_input: Input, apiKey: string): Promise<Output> => {
   try {
     // Removed datatype from input destructuring
-    const { } = input; // No required parameters left
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({

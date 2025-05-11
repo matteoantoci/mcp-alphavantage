@@ -8,9 +8,8 @@ type RawSchemaShape = typeof durablesInputSchemaShape;
 type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any;
 
-const durablesHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const durablesHandler = async (_input: Input, apiKey: string): Promise<Output> => {
   // Removed datatype from input destructuring
-  const { } = input; // No required parameters left
   const params = new URLSearchParams({
     function: 'DURABLES',
     apikey: apiKey,
@@ -35,7 +34,7 @@ type AlphaVantageToolDefinition = {
 
 export const durablesTool: AlphaVantageToolDefinition = {
   name: 'durables',
-  description: 'Fetches monthly manufacturers\' new orders of durable goods in the United States.',
+  description: "Fetches monthly manufacturers' new orders of durable goods in the United States.",
   inputSchemaShape: durablesInputSchemaShape,
   handler: durablesHandler,
 };

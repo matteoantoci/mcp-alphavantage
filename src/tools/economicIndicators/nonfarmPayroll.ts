@@ -8,9 +8,8 @@ type RawSchemaShape = typeof nonfarmPayrollInputSchemaShape;
 type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any;
 
-const nonfarmPayrollHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const nonfarmPayrollHandler = async (_input: Input, apiKey: string): Promise<Output> => {
   // Removed datatype from input destructuring
-  const { } = input; // No required parameters left
   const params = new URLSearchParams({
     function: 'NONFARM_PAYROLL',
     apikey: apiKey,

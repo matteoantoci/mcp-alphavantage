@@ -4,7 +4,11 @@ type McpContent =
   | { type: 'text'; text: string; [key: string]: unknown }
   | { type: 'image'; data: string; mimeType: string; [key: string]: unknown }
   | { type: 'audio'; data: string; mimeType: string; [key: string]: unknown }
-  | { type: 'resource'; resource: { uri: string; text?: string; blob: string; mimeType?: string; [key: string]: unknown }; [key: string]: unknown }; // Made 'blob' required string
+  | {
+      type: 'resource';
+      resource: { uri: string; text?: string; blob: string; mimeType?: string; [key: string]: unknown };
+      [key: string]: unknown;
+    }; // Made 'blob' required string
 
 type McpToolResponse = {
   content: McpContent[];
@@ -20,8 +24,9 @@ type McpToolResponse = {
  * @param handler The original tool handler function.
  * @returns A new handler function that wraps the original handler's result, returning an McpToolResponse.
  */
-export function wrapToolHandler(handler: (...args: any[]) => Promise<any>): (...args: any[]) => Promise<McpToolResponse> {
-  return async (...args: any[]): Promise<McpToolResponse> => {
+export const wrapToolHandler =
+  (handler: (...args: any[]) => Promise<any>): ((...args: any[]) => Promise<McpToolResponse>) =>
+  async (...args: any[]): Promise<McpToolResponse> => {
     try {
       const result = await handler(...args);
       return {
@@ -38,4 +43,3 @@ export function wrapToolHandler(handler: (...args: any[]) => Promise<any>): (...
       };
     }
   };
-}

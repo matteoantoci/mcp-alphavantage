@@ -3,18 +3,41 @@ import { z } from 'zod';
 // Define the input schema shape for the TIME_SERIES_WEEKLY tool
 const timeSeriesWeeklyInputSchemaShape = {
   symbol: z.string().describe('The name of the equity of your choice. For example: IBM'),
+  limit: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Maximum number of time series items to return. If not set, returns all available items.'),
   // Removed datatype parameter
 };
 
 type RawSchemaShape = typeof timeSeriesWeeklyInputSchemaShape;
 type Input = z.infer<z.ZodObject<RawSchemaShape>>;
-type Output = any; // TODO: Define a more specific output type based on Alpha Vantage response
+
+// Define a basic output type for time series data
+type TimeSeriesOutput = {
+  'Meta Data': { [key: string]: string };
+  [timeSeriesKey: string]:
+    | {
+        [timestamp: string]: {
+          '1. open': string;
+          '2. high': string;
+          '3. low': string;
+          '4. close': string;
+          '5. volume': string;
+        };
+      }
+    | { [key: string]: string }; // Allow for 'Meta Data' and potential error messages
+};
+
+type Output = TimeSeriesOutput;
 
 // Define the handler function for the TIME_SERIES_WEEKLY tool
 const timeSeriesWeeklyHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
     // Removed datatype from input destructuring
-    const { symbol } = input;
+    const { symbol, limit } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
@@ -45,8 +68,22 @@ const timeSeriesWeeklyHandler = async (input: Input, apiKey: string): Promise<Ou
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    // Return raw data, wrapping is handled by wrapToolHandler
-    return data;
+    // Find the time series key (e.g., 'Weekly Time Series')
+    const timeSeriesKey = Object.keys(data).find((key) => key.includes('Time Series'));
+    const timeSeriesData = timeSeriesKey ? data[timeSeriesKey] : undefined;
+
+    // Apply limit if provided and time series data exists
+    const limitedData = {
+      ...data,
+      ...(timeSeriesKey && timeSeriesData && typeof limit === 'number' && limit > 0
+        ? {
+            [timeSeriesKey]: Object.fromEntries(Object.entries(timeSeriesData).slice(0, limit)),
+          }
+        : {}),
+    };
+
+    // Return the potentially limited data, wrapping is handled by wrapToolHandler
+    return limitedData;
   } catch (error: unknown) {
     console.error('TIME_SERIES_WEEKLY tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';

@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 const federalFundsRateInputSchemaShape = {
-  interval: z.enum(['daily', 'weekly', 'monthly']).optional().default('monthly')
+  interval: z
+    .enum(['daily', 'weekly', 'monthly'])
+    .optional()
+    .default('monthly')
     .describe('daily, weekly, or monthly (default: monthly)'),
   // Removed datatype parameter
 };

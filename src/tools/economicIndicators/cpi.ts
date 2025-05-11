@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 const cpiInputSchemaShape = {
-  interval: z.enum(['monthly', 'semiannual']).optional().default('monthly')
+  interval: z
+    .enum(['monthly', 'semiannual'])
+    .optional()
+    .default('monthly')
     .describe('monthly or semiannual (default: monthly)'),
   // Removed datatype parameter
 };
