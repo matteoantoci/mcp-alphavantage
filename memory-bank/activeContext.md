@@ -10,6 +10,8 @@ The current focus is on improving project infrastructure, including `package.jso
 - Improved `package.json` with proper scripts (build, start, lint, format, test, typecheck), metadata, and devDependencies.
 - Added a `LICENSE` file.
 - Fixed TypeScript build errors related to unused parameters and imports in tool handler and definition files.
+- Enhanced the `newsSentiment.ts` tool schema and parameter descriptions based on documentation.
+- Corrected Git push to ensure changes were applied to the `master` branch and removed an erroneously created `main` branch on the remote.
 
 ## Next Steps
 
