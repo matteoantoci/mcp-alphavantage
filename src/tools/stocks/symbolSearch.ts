@@ -66,7 +66,7 @@ type AlphaVantageToolDefinition = {
 // Export the tool definition for SYMBOL_SEARCH
 export const symbolSearchTool: AlphaVantageToolDefinition = {
   name: 'symbol_search',
-  description: 'Searches for the best-matching symbols based on keywords.',
+  description: 'Searches for the best-matching stock symbols based on keywords.',
   inputSchemaShape: symbolSearchInputSchemaShape,
   handler: symbolSearchHandler,
 };

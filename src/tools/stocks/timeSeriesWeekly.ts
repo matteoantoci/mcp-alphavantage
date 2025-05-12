@@ -103,7 +103,7 @@ type AlphaVantageToolDefinition = {
 // Export the tool definition for TIME_SERIES_WEEKLY
 export const timeSeriesWeeklyTool: AlphaVantageToolDefinition = {
   name: 'time_series_weekly',
-  description: 'Fetches weekly OHLCV time series for a given equity.',
+  description: 'Fetches weekly OHLCV time series for a given stock/equity.',
   inputSchemaShape: timeSeriesWeeklyInputSchemaShape,
   handler: timeSeriesWeeklyHandler,
 };

@@ -53,7 +53,7 @@ type AlphaVantageToolDefinition = {
 // Export the tool definition for MARKET_STATUS
 export const marketStatusTool: AlphaVantageToolDefinition = {
   name: 'market_status',
-  description: 'Fetches the current market status (open vs. closed) of major trading venues.',
+  description: 'Fetches the current market status (open vs. closed) of major stock trading venues.',
   inputSchemaShape: marketStatusInputSchemaShape,
   handler: marketStatusHandler,
 };

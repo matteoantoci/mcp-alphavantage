@@ -66,7 +66,7 @@ type AlphaVantageToolDefinition = {
 // Export the tool definition for GLOBAL_QUOTE
 export const globalQuoteTool: AlphaVantageToolDefinition = {
   name: 'stock_quote',
-  description: 'Fetches the latest price and volume information for a ticker.',
+  description: 'Fetches the latest stock price and volume information for a stock ticker.',
   inputSchemaShape: globalQuoteInputSchemaShape,
   handler: globalQuoteHandler,
 };

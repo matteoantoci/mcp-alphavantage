@@ -136,7 +136,7 @@ type AlphaVantageToolDefinition = {
 // Export the tool definition for TIME_SERIES_INTRADAY
 export const timeSeriesIntradayTool: AlphaVantageToolDefinition = {
   name: 'time_series_intraday',
-  description: 'Fetches current and historical intraday OHLCV time series for a given equity.',
+  description: 'Fetches current and historical intraday OHLCV time series for a given stock/equity.',
   inputSchemaShape: timeSeriesIntradayInputSchemaShape,
   handler: timeSeriesIntradayHandler,
 };
