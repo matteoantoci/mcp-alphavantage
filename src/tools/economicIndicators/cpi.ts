@@ -6,16 +6,33 @@ const cpiInputSchemaShape = {
     .optional()
     .default('monthly')
     .describe('monthly or semiannual (default: monthly)'),
-  // Removed datatype parameter
+  limit: z // Added limit parameter
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Maximum number of time series items to return. If not set, returns all available items.'),
 };
 
 type RawSchemaShape = typeof cpiInputSchemaShape;
 type Input = z.infer<z.ZodObject<RawSchemaShape>>;
-type Output = any;
+
+type CpiDataItem = {
+  date: string;
+  value: string;
+};
+
+type CpiApiResponse = {
+  metadata?: Record<string, string>;
+  data?: CpiDataItem[];
+  'Error Message'?: string;
+};
+
+type Output = CpiApiResponse;
 
 const cpiHandler = async (input: Input, apiKey: string): Promise<Output> => {
   // Removed datatype from input destructuring
-  const { interval } = input;
+  const { interval, limit } = input; // Destructure limit
   const params = new URLSearchParams({
     function: 'CPI',
     apikey: apiKey,
@@ -28,8 +45,13 @@ const cpiHandler = async (input: Input, apiKey: string): Promise<Output> => {
   // Removed CSV handling logic
   const data = await response.json();
   if (data['Error Message']) throw new Error(data['Error Message']);
-  // Return raw data, wrapping is handled by wrapToolHandler
-  return data;
+
+  // Apply limit if provided without mutating original data
+  const resultData =
+    limit !== undefined && data.data && Array.isArray(data.data) ? { ...data, data: data.data.slice(0, limit) } : data;
+
+  // Return processed data, wrapping is handled by wrapToolHandler
+  return resultData;
 };
 
 type AlphaVantageToolDefinition = {

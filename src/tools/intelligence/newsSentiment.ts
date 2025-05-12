@@ -5,8 +5,15 @@ const newsSentimentInputSchemaShape = {
   tickers: z
     .string()
     .optional()
-    .describe('Comma-separated stock/crypto/forex symbols. Filters for articles that simultaneously mention all provided tickers (e.g., "IBM" or "COIN,CRYPTO:BTC,FOREX:USD").'),
-  topics: z.string().optional().describe('Comma-separated news topics. Filters for articles that simultaneously cover all provided topics (e.g., "technology" or "technology,ipo"). Supported topics: blockchain, earnings, ipo, mergers_and_acquisitions, financial_markets, economy_fiscal, economy_monetary, economy_macro, energy_transportation, finance, life_sciences, manufacturing, real_estate, retail_wholesale, technology.'),
+    .describe(
+      'Comma-separated stock/crypto/forex symbols. Filters for articles that simultaneously mention all provided tickers (e.g., "IBM" or "COIN,CRYPTO:BTC,FOREX:USD").'
+    ),
+  topics: z
+    .string()
+    .optional()
+    .describe(
+      'Comma-separated news topics. Filters for articles that simultaneously cover all provided topics (e.g., "technology" or "technology,ipo"). Supported topics: blockchain, earnings, ipo, mergers_and_acquisitions, financial_markets, economy_fiscal, economy_monetary, economy_macro, energy_transportation, finance, life_sciences, manufacturing, real_estate, retail_wholesale, technology.'
+    ),
   time_from: z.string().optional().describe('The time range start (YYYYMMDDTHHMM format).'),
   time_to: z.string().optional().describe('The time range end (YYYYMMDDTHHMM format).'),
   sort: z.enum(['LATEST', 'EARLIEST', 'RELEVANCE']).optional().default('LATEST').describe('Sort order.'),

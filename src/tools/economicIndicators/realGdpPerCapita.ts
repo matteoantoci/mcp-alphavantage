@@ -2,14 +2,21 @@ import { z } from 'zod';
 
 const realGdpPerCapitaInputSchemaShape = {
   // Removed datatype parameter
+  limit: z // Added limit parameter
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Maximum number of time series items to return. If not set, returns all available items.'),
 };
 
 type RawSchemaShape = typeof realGdpPerCapitaInputSchemaShape;
 type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any;
 
-const realGdpPerCapitaHandler = async (_input: Input, apiKey: string): Promise<Output> => {
+const realGdpPerCapitaHandler = async (input: Input, apiKey: string): Promise<Output> => {
   // Removed datatype from input destructuring
+  const { limit } = input; // Destructure limit
   const params = new URLSearchParams({
     function: 'REAL_GDP_PER_CAPITA',
     apikey: apiKey,
@@ -21,8 +28,13 @@ const realGdpPerCapitaHandler = async (_input: Input, apiKey: string): Promise<O
   // Removed CSV handling logic
   const data = await response.json();
   if (data['Error Message']) throw new Error(data['Error Message']);
-  // Return raw data, wrapping is handled by wrapToolHandler
-  return data;
+
+  // Apply limit if provided without mutating original data
+  const resultData =
+    limit !== undefined && data.data && Array.isArray(data.data) ? { ...data, data: data.data.slice(0, limit) } : data;
+
+  // Return processed data, wrapping is handled by wrapToolHandler
+  return resultData;
 };
 
 type AlphaVantageToolDefinition = {
