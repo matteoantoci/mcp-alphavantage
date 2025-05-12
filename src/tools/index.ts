@@ -6,6 +6,7 @@ import { registerIntelligenceTools } from './intelligence/index.js';
 import { registerFundamentalsTools } from './fundamentals/index.js';
 import { registerIndicatorsTools } from './indicators/index.js';
 import { registerEconomicIndicatorsTools } from './economicIndicators/index.js';
+import { registerCryptoTools } from './crypto/index.js';
 
 /**
  * Registers all Alpha Vantage tools with the MCP server.
@@ -21,6 +22,7 @@ export const registerTools = (server: McpServer, apiKey: string): void => {
   registerFundamentalsTools(server, apiKey);
   registerIndicatorsTools(server, apiKey); // Technical indicators from the original repo
   registerEconomicIndicatorsTools(server, apiKey);
+  registerCryptoTools(server, apiKey);
 
   console.log('Finished registering Alpha Vantage tools.');
 };
