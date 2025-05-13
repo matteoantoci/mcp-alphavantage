@@ -3,6 +3,8 @@ import { z } from 'zod';
 // Define the input schema shape for the INSIDER_TRANSACTIONS tool
 const insiderTransactionsInputSchemaShape = {
   symbol: z.string().describe('The symbol of the ticker of your choice. For example: IBM.'),
+  startDate: z.string().optional().describe('The start date for filtering transactions (YYYY-MM-DD).'),
+  endDate: z.string().optional().describe('The end date for filtering transactions (YYYY-MM-DD).'),
   // Removed datatype parameter
 };
 
@@ -14,7 +16,8 @@ type Output = any; // TODO: Define a more specific output type based on Alpha Va
 const insiderTransactionsHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
     // Removed datatype from input destructuring
-    const { symbol } = input;
+    // Added startDate and endDate to input destructuring
+    const { symbol, startDate, endDate } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
     const params = new URLSearchParams({
@@ -45,8 +48,24 @@ const insiderTransactionsHandler = async (input: Input, apiKey: string): Promise
       console.warn(`Alpha Vantage API Note: ${data['Note']}`);
     }
 
-    // Return raw data, wrapping is handled by wrapToolHandler
-    return data;
+    // Filter data if startDate or endDate are provided
+    let filteredData = data;
+    if (Array.isArray(data) && (startDate || endDate)) {
+      filteredData = data.filter((transaction: any) => {
+        if (!transaction.transaction_date) return false;
+        const transactionDate = new Date(transaction.transaction_date);
+        if (startDate && transactionDate < new Date(startDate)) {
+          return false;
+        }
+        if (endDate && transactionDate > new Date(endDate)) {
+          return false;
+        }
+        return true;
+      });
+    }
+
+    // Return filtered data, wrapping is handled by wrapToolHandler
+    return filteredData;
   } catch (error: unknown) {
     console.error('INSIDER_TRANSACTIONS tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';

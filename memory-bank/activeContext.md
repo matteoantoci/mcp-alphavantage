@@ -1,31 +1,25 @@
-# Active Context: Alpha Vantage MCP Server
+## Active Context: Alpha Vantage MCP Server
 
-## Current Work Focus
+### Current Work Focus
 
-The current focus is on improving project infrastructure, including `package.json`, linting, building, and licensing, as part of the broader documentation and quality assurance phase.
+The primary focus has been on enhancing the `insider_transactions` tool within the Alpha Vantage MCP server. The user requested the ability to filter insider transactions by a date range.
 
-## Recent Changes
+### Recent Changes
 
-- Scaffolded the `memory-bank` directory and populated initial core files.
-- Improved `package.json` with proper scripts (build, start, lint, format, test, typecheck), metadata, and devDependencies.
-- Added a `LICENSE` file.
-- Fixed TypeScript build errors related to unused parameters and imports in tool handler and definition files.
-- Enhanced the `newsSentiment.ts` tool schema and parameter descriptions based on documentation.
-- Corrected Git push to ensure changes were applied to the `master` branch and removed an erroneously created `main` branch on the remote.
-- Implemented an LRU cache for tool responses using `lru-cache`, with configurable TTLs per tool.
+-   **`src/tools/intelligence/insiderTransactions.ts`**:
+    -   Added optional `startDate` (YYYY-MM-DD) and `endDate` (YYYY-MM-DD) parameters to the `insiderTransactionsInputSchemaShape`.
+    -   Updated the `insiderTransactionsHandler` to accept these new parameters.
+    -   Implemented filtering logic within the handler to process the full API response and return only transactions falling within the specified date range (inclusive). This client-side filtering is necessary as the Alpha Vantage API for insider transactions does not natively support date range parameters.
+    -   The `datatype` parameter remains hardcoded to `json` as per previous requirements.
 
-## Next Steps
+### Next Steps
 
-- Continue with the plan outlined in the previous PLAN MODE response, focusing on:
-    - End-to-end testing of all implemented tools, including verifying the caching mechanism.
-    - Comprehensive documentation (README, tool descriptions), including details about the caching.
-    - Potential future extensions.
-    - Implementation of automated tests, including tests for the caching logic.
-- Update `memory-bank/progress.md` to reflect the current status and completed tasks.
+-   Thoroughly test the updated `insider_transactions` tool with various combinations of `startDate` and `endDate` (including cases where one or both are omitted) to ensure the filtering logic works correctly and handles edge cases.
+-   Update `progress.md` to reflect the new functionality and testing requirements.
+-   Proceed with implementing automated tests for the project, including tests for the caching mechanism and the newly added date filtering in `insiderTransactions`.
 
-## Active Decisions and Considerations
+### Active Decisions and Considerations
 
-- Ensuring the Memory Bank accurately reflects the project's current state and history is crucial for effective future work.
-- The project now has basic linting and build configurations in place.
-- The LRU cache has been successfully integrated into the tool handling process.
-- The next phase will heavily involve testing and further documentation, with a specific focus on verifying the caching behavior.
+-   **Client-Side Filtering**: Due to the Alpha Vantage API not supporting date filtering for insider transactions, the filtering logic has been implemented within the tool's handler function. This means the tool will always fetch all available data for the given symbol and then filter it locally. This could have performance implications for symbols with a very large number of transactions, but it fulfills the user's requirement.
+-   **Date Format**: The date format for `startDate` and `endDate` is YYYY-MM-DD. The filtering logic correctly parses these dates for comparison.
+-   **Caching**: The existing LRU cache in `wrapToolHandler.ts` will cache the *unfiltered* response from the Alpha Vantage API for `insider_transactions`. The date filtering will be applied *after* retrieving from the cache or fetching from the API. This is the most efficient approach as it caches the raw, complete dataset.
