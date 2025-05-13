@@ -12,11 +12,81 @@ type RawSchemaShape = typeof insiderTransactionsInputSchemaShape;
 type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any; // TODO: Define a more specific output type based on Alpha Vantage response
 
+// Helper function to extract the list of transactions from the API response
+const extractTransactionsList = (apiResponse: any): any[] => {
+  if (Array.isArray(apiResponse)) {
+    return apiResponse;
+  }
+  if (apiResponse && typeof apiResponse === 'object' && apiResponse.data && Array.isArray(apiResponse.data)) {
+    return apiResponse.data;
+  }
+  console.warn('Insider transactions data not found or not in expected array format. API Response:', apiResponse);
+  return []; // Return empty array for unexpected structures
+};
+
+// Helper function to filter transactions by date range
+const filterTransactionsByDate = (
+  transactions: any[],
+  startDate?: string,
+  endDate?: string
+): any[] => {
+  if (!startDate && !endDate) {
+    return transactions; // No filtering needed
+  }
+
+  return transactions.filter((transaction: any) => {
+    if (!transaction.transaction_date) {
+      console.warn('Transaction date property not found on transaction object:', transaction);
+      return false;
+    }
+
+    const transactionTimestamp = Date.parse(transaction.transaction_date);
+    if (isNaN(transactionTimestamp)) {
+      console.warn(`Failed to parse transaction date: ${transaction.transaction_date}`);
+      return false;
+    }
+
+    let startFilterActive = false;
+    let endFilterActive = false;
+    let includeByStartDate = true;
+    let includeByEndDate = true;
+
+    if (startDate) {
+      const filterStartTimestamp = Date.parse(startDate);
+      if (!isNaN(filterStartTimestamp)) {
+        startFilterActive = true;
+        includeByStartDate = transactionTimestamp >= filterStartTimestamp;
+      } else {
+        console.warn(`Failed to parse start date: ${startDate}`);
+      }
+    }
+
+    if (endDate) {
+      const filterEndTimestamp = Date.parse(endDate + 'T23:59:59.999Z'); // End of the specified day in UTC
+      if (!isNaN(filterEndTimestamp)) {
+        endFilterActive = true;
+        includeByEndDate = transactionTimestamp <= filterEndTimestamp;
+      } else {
+        console.warn(`Failed to parse end date: ${endDate}`);
+      }
+    }
+
+    // If no valid date filters were actually parsed and activated, include the transaction
+    // This handles cases where startDate or endDate were provided but were invalid.
+    // If both are invalid, all transactions pass the date filter.
+    // If one is valid and one invalid, only the valid one applies.
+    if (!startFilterActive && !endFilterActive && (startDate || endDate)) {
+        return true;
+    }
+
+    return includeByStartDate && includeByEndDate;
+  });
+};
+
+
 // Define the handler function for the INSIDER_TRANSACTIONS tool
 const insiderTransactionsHandler = async (input: Input, apiKey: string): Promise<Output> => {
   try {
-    // Removed datatype from input destructuring
-    // Added startDate and endDate to input destructuring
     const { symbol, startDate, endDate } = input;
 
     const baseUrl = 'https://www.alphavantage.co/query';
@@ -24,52 +94,41 @@ const insiderTransactionsHandler = async (input: Input, apiKey: string): Promise
       function: 'INSIDER_TRANSACTIONS',
       symbol,
       apikey: apiKey,
-      datatype: 'json', // Hardcoded datatype to 'json'
+      datatype: 'json',
     });
 
     const url = `${baseUrl}?${params.toString()}`;
-
     const response = await fetch(url);
 
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
     }
 
-    // Removed CSV handling logic
+    const apiResponse = await response.json();
 
-    // Handle JSON response
-    const data = await response.json();
-
-    // Check for Alpha Vantage API errors (e.g., API limit, invalid parameters)
-    if (data['Error Message']) {
-      throw new Error(`Alpha Vantage API Error: ${data['Error Message']}`);
+    if (apiResponse['Error Message']) {
+      throw new Error(`Alpha Vantage API Error: ${apiResponse['Error Message']}`);
     }
-    if (data['Note']) {
-      console.warn(`Alpha Vantage API Note: ${data['Note']}`);
+    if (apiResponse['Note']) {
+      console.warn(`Alpha Vantage API Note: ${apiResponse['Note']}`);
+      // If a note is present (e.g. API limit), actual data might be missing.
+      // extractTransactionsList will handle returning [] if data is not found.
     }
 
-    // Filter data if startDate or endDate are provided
-    let filteredData = data;
-    if (Array.isArray(data) && (startDate || endDate)) {
-      filteredData = data.filter((transaction: any) => {
-        if (!transaction.transaction_date) return false;
-        const transactionDate = new Date(transaction.transaction_date);
-        if (startDate && transactionDate < new Date(startDate)) {
-          return false;
-        }
-        if (endDate && transactionDate > new Date(endDate)) {
-          return false;
-        }
-        return true;
-      });
+    const transactionsList = extractTransactionsList(apiResponse);
+
+    // If the API returned a note (e.g. rate limit) and no actual data,
+    // and filtering was requested, transactionsList would be empty.
+    // Returning an empty array is appropriate.
+    if (transactionsList.length === 0 && (startDate || endDate)) {
+        return [];
     }
 
-    // Return filtered data, wrapping is handled by wrapToolHandler
-    return filteredData;
+    return filterTransactionsByDate(transactionsList, startDate, endDate);
+
   } catch (error: unknown) {
     console.error('INSIDER_TRANSACTIONS tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
-    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`INSIDER_TRANSACTIONS tool failed: ${message}`);
   }
 };
