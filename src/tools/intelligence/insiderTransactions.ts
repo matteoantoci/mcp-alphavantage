@@ -25,11 +25,7 @@ const extractTransactionsList = (apiResponse: any): any[] => {
 };
 
 // Helper function to filter transactions by date range
-const filterTransactionsByDate = (
-  transactions: any[],
-  startDate?: string,
-  endDate?: string
-): any[] => {
+const filterTransactionsByDate = (transactions: any[], startDate?: string, endDate?: string): any[] => {
   if (!startDate && !endDate) {
     return transactions; // No filtering needed
   }
@@ -76,13 +72,12 @@ const filterTransactionsByDate = (
     // If both are invalid, all transactions pass the date filter.
     // If one is valid and one invalid, only the valid one applies.
     if (!startFilterActive && !endFilterActive && (startDate || endDate)) {
-        return true;
+      return true;
     }
 
     return includeByStartDate && includeByEndDate;
   });
 };
-
 
 // Define the handler function for the INSIDER_TRANSACTIONS tool
 const insiderTransactionsHandler = async (input: Input, apiKey: string): Promise<Output> => {
@@ -121,11 +116,10 @@ const insiderTransactionsHandler = async (input: Input, apiKey: string): Promise
     // and filtering was requested, transactionsList would be empty.
     // Returning an empty array is appropriate.
     if (transactionsList.length === 0 && (startDate || endDate)) {
-        return [];
+      return [];
     }
 
     return filterTransactionsByDate(transactionsList, startDate, endDate);
-
   } catch (error: unknown) {
     console.error('INSIDER_TRANSACTIONS tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';

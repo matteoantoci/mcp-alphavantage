@@ -11,6 +11,10 @@
 -   **`insider_transactions` Tool Enhancements**:
     -   The tool now supports optional `startDate` and `endDate` parameters (YYYY-MM-DD format) for filtering transactions by date.
     -   Filtering logic is implemented client-side within the tool's handler as the API does not support native date filtering for this endpoint.
+-   **`historical_options` Tool Enhancements**:
+    -   The tool now supports optional `strike_price_proximity_count`, `current_stock_price`, `expiration_months_offset`, `min_open_interest`, `min_volume`, and `option_type` parameters for filtering options data.
+    -   Filtering logic is implemented client-side within the tool's handler as the API does not support native filtering for these parameters.
+    -   `bignumber.js` is used for precise numerical comparisons during filtering.
 -   **Caching Mechanism**:
     -   An LRU (Least Recently Used) cache is implemented in `src/cacheService.ts`.
     -   The `wrapToolHandler` in `src/tools/wrapToolHandler.ts` uses this cache service.
@@ -23,7 +27,7 @@
     -   Each category has an `index.ts` to export its tools.
     -   The main `src/tools/index.ts` aggregates all tools.
 -   **Build Process**: The project can be built using `npm run build` (which executes `tsc`).
--   **Linting and Formatting**: ESLint and Prettier are configured and can be run with `npm run lint` and `npm run format`.
+-   **Linting and Formatting**: ESLint and Prettier are configured and can be run with `npm run lint` and `npm format`.
 
 ### What's Left to Build / Improve
 
@@ -61,7 +65,8 @@
 
 -   The MCP server is functional, with all defined Alpha Vantage tools implemented and basic caching in place.
 -   The `insider_transactions` tool has been enhanced with date filtering capabilities.
--   The immediate next steps involve writing comprehensive tests for all components, particularly the caching mechanism and the new date filtering.
+-   The `historical_options` tool has been enhanced with filtering capabilities.
+-   The immediate next steps involve writing comprehensive tests for all components, particularly the caching mechanism and the new filtering.
 
 ### Known Issues
 
