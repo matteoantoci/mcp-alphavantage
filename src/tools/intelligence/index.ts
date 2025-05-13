@@ -20,38 +20,38 @@ export const registerIntelligenceTools = (server: McpServer, apiKey: string): vo
     newsSentimentTool.name,
     newsSentimentTool.description,
     newsSentimentTool.inputSchemaShape,
-    wrapToolHandler((input) => newsSentimentTool.handler(input, apiKey))
+    wrapToolHandler(newsSentimentTool.name, (input) => newsSentimentTool.handler(input, apiKey))
   );
   server.tool(
     earningsCallTranscriptTool.name,
     earningsCallTranscriptTool.description,
     earningsCallTranscriptTool.inputSchemaShape,
-    wrapToolHandler((input) => earningsCallTranscriptTool.handler(input, apiKey))
+    wrapToolHandler(earningsCallTranscriptTool.name, (input) => earningsCallTranscriptTool.handler(input, apiKey))
   );
   // topGainersLosersTool has an empty input schema, so its handler does not expect 'input'
   server.tool(
     topGainersLosersTool.name,
     topGainersLosersTool.description,
     topGainersLosersTool.inputSchemaShape,
-    wrapToolHandler(() => topGainersLosersTool.handler(apiKey))
+    wrapToolHandler(topGainersLosersTool.name, () => topGainersLosersTool.handler(apiKey))
   );
   server.tool(
     insiderTransactionsTool.name,
     insiderTransactionsTool.description,
     insiderTransactionsTool.inputSchemaShape,
-    wrapToolHandler((input) => insiderTransactionsTool.handler(input, apiKey))
+    wrapToolHandler(insiderTransactionsTool.name, (input) => insiderTransactionsTool.handler(input, apiKey))
   );
   server.tool(
     analyticsFixedWindowTool.name,
     analyticsFixedWindowTool.description,
     analyticsFixedWindowTool.inputSchemaShape,
-    wrapToolHandler((input) => analyticsFixedWindowTool.handler(input, apiKey))
+    wrapToolHandler(analyticsFixedWindowTool.name, (input) => analyticsFixedWindowTool.handler(input, apiKey))
   );
   server.tool(
     analyticsSlidingWindowTool.name,
     analyticsSlidingWindowTool.description,
     analyticsSlidingWindowTool.inputSchemaShape,
-    wrapToolHandler((input) => analyticsSlidingWindowTool.handler(input, apiKey))
+    wrapToolHandler(analyticsSlidingWindowTool.name, (input) => analyticsSlidingWindowTool.handler(input, apiKey))
   );
 
   console.log('Finished registering Alpha Vantage Intelligence tools.');

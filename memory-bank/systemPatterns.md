@@ -25,3 +25,4 @@ The Alpha Vantage MCP server follows a modular architecture designed for scalabi
 - `src/tools/[category]/index.ts`: Imports and registers individual tools within that category (e.g., `src/tools/stocks/globalQuote.ts`).
 - `src/tools/[category]/[toolName].ts`: Contains the Zod schema, handler function, and tool definition for a specific Alpha Vantage endpoint.
 - Handlers within tool files use native fetch to interact with the Alpha Vantage API.
+- A caching layer is implemented using `lru-cache` to store results of tool calls based on their parameters and a configurable Time To Live (TTL). This is handled transparently by the `wrapToolHandler`.

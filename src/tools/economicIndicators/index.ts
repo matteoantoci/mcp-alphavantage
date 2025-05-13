@@ -17,61 +17,61 @@ export const registerEconomicIndicatorsTools = (server: McpServer, apiKey: strin
     realGdpTool.name,
     realGdpTool.description,
     realGdpTool.inputSchemaShape,
-    wrapToolHandler((input) => realGdpTool.handler(input, apiKey))
+    wrapToolHandler(realGdpTool.name, (input) => realGdpTool.handler(input, apiKey))
   );
   server.tool(
     realGdpPerCapitaTool.name,
     realGdpPerCapitaTool.description,
     realGdpPerCapitaTool.inputSchemaShape,
-    wrapToolHandler((input) => realGdpPerCapitaTool.handler(input, apiKey))
+    wrapToolHandler(realGdpPerCapitaTool.name, (input) => realGdpPerCapitaTool.handler(input, apiKey))
   );
   server.tool(
     treasuryYieldTool.name,
     treasuryYieldTool.description,
     treasuryYieldTool.inputSchemaShape,
-    wrapToolHandler((input) => treasuryYieldTool.handler(input, apiKey))
+    wrapToolHandler(treasuryYieldTool.name, (input) => treasuryYieldTool.handler(input, apiKey))
   );
   server.tool(
     federalFundsRateTool.name,
     federalFundsRateTool.description,
     federalFundsRateTool.inputSchemaShape,
-    wrapToolHandler((input) => federalFundsRateTool.handler(input, apiKey))
+    wrapToolHandler(federalFundsRateTool.name, (input) => federalFundsRateTool.handler(input, apiKey))
   );
   server.tool(
     cpiTool.name,
     cpiTool.description,
     cpiTool.inputSchemaShape,
-    wrapToolHandler((input) => cpiTool.handler(input, apiKey))
+    wrapToolHandler(cpiTool.name, (input) => cpiTool.handler(input, apiKey))
   );
   server.tool(
     inflationTool.name,
     inflationTool.description,
     inflationTool.inputSchemaShape,
-    wrapToolHandler((input) => inflationTool.handler(input, apiKey))
+    wrapToolHandler(inflationTool.name, (input) => inflationTool.handler(input, apiKey))
   );
   server.tool(
     retailSalesTool.name,
     retailSalesTool.description,
     retailSalesTool.inputSchemaShape,
-    wrapToolHandler((input) => retailSalesTool.handler(input, apiKey))
+    wrapToolHandler(retailSalesTool.name, (input) => retailSalesTool.handler(input, apiKey))
   );
   server.tool(
     durablesTool.name,
     durablesTool.description,
     durablesTool.inputSchemaShape,
-    wrapToolHandler((input) => durablesTool.handler(input, apiKey))
+    wrapToolHandler(durablesTool.name, (input) => durablesTool.handler(input, apiKey))
   );
   server.tool(
     unemploymentTool.name,
     unemploymentTool.description,
     unemploymentTool.inputSchemaShape,
-    wrapToolHandler((input) => unemploymentTool.handler(input, apiKey))
+    wrapToolHandler(unemploymentTool.name, (input) => unemploymentTool.handler(input, apiKey))
   );
   server.tool(
     nonfarmPayrollTool.name,
     nonfarmPayrollTool.description,
     nonfarmPayrollTool.inputSchemaShape,
-    wrapToolHandler((input) => nonfarmPayrollTool.handler(input, apiKey))
+    wrapToolHandler(nonfarmPayrollTool.name, (input) => nonfarmPayrollTool.handler(input, apiKey))
   );
   console.log('Finished registering Alpha Vantage Economic Indicators tools.');
 };

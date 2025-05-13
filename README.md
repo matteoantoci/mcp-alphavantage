@@ -110,6 +110,13 @@ The project follows a modular structure:
 └── README.md             # This file
 ```
 
+## Caching
+
+The server implements an in-memory Least Recently Used (LRU) cache for tool responses. This helps reduce redundant calls to the Alpha Vantage API, improving performance and adhering to rate limits.
+
+- **Mechanism:** The cache stores responses based on the tool name and input parameters.
+- **Configurable TTLs:** Each tool has a configurable Time To Live (TTL) for its cached data, defined in `src/cacheConfig.ts`. This allows for different caching durations based on the update frequency of the data provided by each Alpha Vantage endpoint.
+
 ## Licensing
 
 This project is licensed under the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See the `LICENSE` file for details.

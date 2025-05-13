@@ -21,44 +21,44 @@ export const registerStocksTools = (server: McpServer, apiKey: string): void => 
     timeSeriesIntradayTool.name,
     timeSeriesIntradayTool.description,
     timeSeriesIntradayTool.inputSchemaShape,
-    wrapToolHandler((input) => timeSeriesIntradayTool.handler(input, apiKey))
+    wrapToolHandler(timeSeriesIntradayTool.name, (input) => timeSeriesIntradayTool.handler(input, apiKey))
   );
   server.tool(
     timeSeriesDailyTool.name,
     timeSeriesDailyTool.description,
     timeSeriesDailyTool.inputSchemaShape,
-    wrapToolHandler((input) => timeSeriesDailyTool.handler(input, apiKey))
+    wrapToolHandler(timeSeriesDailyTool.name, (input) => timeSeriesDailyTool.handler(input, apiKey))
   );
   server.tool(
     timeSeriesWeeklyTool.name,
     timeSeriesWeeklyTool.description,
     timeSeriesWeeklyTool.inputSchemaShape,
-    wrapToolHandler((input) => timeSeriesWeeklyTool.handler(input, apiKey))
+    wrapToolHandler(timeSeriesWeeklyTool.name, (input) => timeSeriesWeeklyTool.handler(input, apiKey))
   );
   server.tool(
     timeSeriesMonthlyTool.name,
     timeSeriesMonthlyTool.description,
     timeSeriesMonthlyTool.inputSchemaShape,
-    wrapToolHandler((input) => timeSeriesMonthlyTool.handler(input, apiKey))
+    wrapToolHandler(timeSeriesMonthlyTool.name, (input) => timeSeriesMonthlyTool.handler(input, apiKey))
   );
   server.tool(
     globalQuoteTool.name,
     globalQuoteTool.description,
     globalQuoteTool.inputSchemaShape,
-    wrapToolHandler((input) => globalQuoteTool.handler(input, apiKey))
+    wrapToolHandler(globalQuoteTool.name, (input) => globalQuoteTool.handler(input, apiKey))
   );
   server.tool(
     symbolSearchTool.name,
     symbolSearchTool.description,
     symbolSearchTool.inputSchemaShape,
-    wrapToolHandler((input) => symbolSearchTool.handler(input, apiKey))
+    wrapToolHandler(symbolSearchTool.name, (input) => symbolSearchTool.handler(input, apiKey))
   );
   // marketStatusTool has an empty input schema, so its handler does not expect 'input'
   server.tool(
     marketStatusTool.name,
     marketStatusTool.description,
     marketStatusTool.inputSchemaShape,
-    wrapToolHandler(() => marketStatusTool.handler(apiKey))
+    wrapToolHandler(marketStatusTool.name, () => marketStatusTool.handler(apiKey))
   );
 
   console.log('Finished registering Alpha Vantage Stocks tools.');

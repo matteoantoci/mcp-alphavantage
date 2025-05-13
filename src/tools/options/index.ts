@@ -15,7 +15,7 @@ export const registerOptionsTools = (server: McpServer, apiKey: string): void =>
     historicalOptionsTool.name,
     historicalOptionsTool.description,
     historicalOptionsTool.inputSchemaShape,
-    wrapToolHandler((input) => historicalOptionsTool.handler(input, apiKey))
+    wrapToolHandler(historicalOptionsTool.name, (input) => historicalOptionsTool.handler(input, apiKey))
   );
 
   console.log('Finished registering Alpha Vantage Options tools.');

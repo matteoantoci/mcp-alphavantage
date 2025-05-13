@@ -24,61 +24,61 @@ export const registerIndicatorsTools = (server: McpServer, apiKey: string): void
     smaTool.name,
     smaTool.description,
     smaTool.inputSchemaShape,
-    wrapToolHandler((input) => smaTool.handler(input, apiKey))
+    wrapToolHandler(smaTool.name, (input) => smaTool.handler(input, apiKey))
   );
   server.tool(
     emaTool.name,
     emaTool.description,
     emaTool.inputSchemaShape,
-    wrapToolHandler((input) => emaTool.handler(input, apiKey))
+    wrapToolHandler(emaTool.name, (input) => emaTool.handler(input, apiKey))
   );
   server.tool(
     rsiTool.name,
     rsiTool.description,
     rsiTool.inputSchemaShape,
-    wrapToolHandler((input) => rsiTool.handler(input, apiKey))
+    wrapToolHandler(rsiTool.name, (input) => rsiTool.handler(input, apiKey))
   );
   server.tool(
     bbandsTool.name,
     bbandsTool.description,
     bbandsTool.inputSchemaShape,
-    wrapToolHandler((input) => bbandsTool.handler(input, apiKey))
+    wrapToolHandler(bbandsTool.name, (input) => bbandsTool.handler(input, apiKey))
   );
   server.tool(
     adxTool.name,
     adxTool.description,
     adxTool.inputSchemaShape,
-    wrapToolHandler((input) => adxTool.handler(input, apiKey))
+    wrapToolHandler(adxTool.name, (input) => adxTool.handler(input, apiKey))
   );
   server.tool(
     obvTool.name,
     obvTool.description,
     obvTool.inputSchemaShape,
-    wrapToolHandler((input) => obvTool.handler(input, apiKey))
+    wrapToolHandler(obvTool.name, (input) => obvTool.handler(input, apiKey))
   );
   server.tool(
     atrTool.name,
     atrTool.description,
     atrTool.inputSchemaShape,
-    wrapToolHandler((input) => atrTool.handler(input, apiKey))
+    wrapToolHandler(atrTool.name, (input) => atrTool.handler(input, apiKey))
   );
   server.tool(
     adTool.name,
     adTool.description,
     adTool.inputSchemaShape,
-    wrapToolHandler((input) => adTool.handler(input, apiKey))
+    wrapToolHandler(adTool.name, (input) => adTool.handler(input, apiKey))
   );
   server.tool(
     stochTool.name,
     stochTool.description,
     stochTool.inputSchemaShape,
-    wrapToolHandler((input) => stochTool.handler(input, apiKey))
+    wrapToolHandler(stochTool.name, (input) => stochTool.handler(input, apiKey))
   );
   server.tool(
     aroonTool.name,
     aroonTool.description,
     aroonTool.inputSchemaShape,
-    wrapToolHandler((input) => aroonTool.handler(input, apiKey))
+    wrapToolHandler(aroonTool.name, (input) => aroonTool.handler(input, apiKey))
   );
 
   console.log('Finished registering Alpha Vantage Technical Indicators tools.');

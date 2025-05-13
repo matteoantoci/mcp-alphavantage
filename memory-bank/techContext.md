@@ -7,6 +7,7 @@
 - **@modelcontextprotocol/sdk:** Core library for building the MCP server.
 - **Zod:** Library for defining and validating tool input schemas.
 - **Native Fetch API:** Used for making HTTP requests (requires Node.js 18+).
+- **lru-cache:** Used for implementing the in-memory LRU cache for tool results.
 
 ## Development Setup
 
@@ -21,10 +22,12 @@
 - **Alpha Vantage API Limits:** Adherence to Alpha Vantage API rate limits and usage policies is required.
 - **Node.js Version:** Requires Node.js 18+ for native fetch support.
 - **Excluded Endpoints:** Premium Alpha Vantage endpoints and certain non-trending technical indicators were intentionally excluded from the initial implementation scope.
+- **Cache Size:** The LRU cache has a maximum size to prevent excessive memory consumption.
 
 ## Dependencies
 
 - `@modelcontextprotocol/sdk`
 - `zod`
 - `typescript`
+- `lru-cache`
 - Development dependencies (e.g., testing frameworks, linters, formatters) are managed via `package.json`.

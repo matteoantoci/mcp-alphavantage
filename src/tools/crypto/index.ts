@@ -16,25 +16,25 @@ export const registerCryptoTools = (server: McpServer, apiKey: string): void => 
     currencyExchangeRateTool.name,
     currencyExchangeRateTool.description,
     currencyExchangeRateTool.inputSchemaShape.shape, // Use .shape
-    wrapToolHandler((input) => currencyExchangeRateTool.handler(input, apiKey))
+    wrapToolHandler(currencyExchangeRateTool.name, (input) => currencyExchangeRateTool.handler(input, apiKey))
   );
   server.tool(
     digitalCurrencyDailyTool.name,
     digitalCurrencyDailyTool.description,
     digitalCurrencyDailyTool.inputSchemaShape.shape, // Use .shape
-    wrapToolHandler((input) => digitalCurrencyDailyTool.handler(input, apiKey))
+    wrapToolHandler(digitalCurrencyDailyTool.name, (input) => digitalCurrencyDailyTool.handler(input, apiKey))
   );
   server.tool(
     digitalCurrencyWeeklyTool.name,
     digitalCurrencyWeeklyTool.description,
     digitalCurrencyWeeklyTool.inputSchemaShape.shape, // Use .shape
-    wrapToolHandler((input) => digitalCurrencyWeeklyTool.handler(input, apiKey))
+    wrapToolHandler(digitalCurrencyWeeklyTool.name, (input) => digitalCurrencyWeeklyTool.handler(input, apiKey))
   );
   server.tool(
     digitalCurrencyMonthlyTool.name,
     digitalCurrencyMonthlyTool.description,
     digitalCurrencyMonthlyTool.inputSchemaShape.shape, // Use .shape
-    wrapToolHandler((input) => digitalCurrencyMonthlyTool.handler(input, apiKey))
+    wrapToolHandler(digitalCurrencyMonthlyTool.name, (input) => digitalCurrencyMonthlyTool.handler(input, apiKey))
   );
 
   console.log('Finished registering Alpha Vantage Crypto tools.');
