@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 // Define the input schema shape for the TIME_SERIES_MONTHLY tool
 const timeSeriesMonthlyInputSchemaShape = {
@@ -34,39 +35,17 @@ type TimeSeriesOutput = {
 type Output = TimeSeriesOutput;
 
 // Define the handler function for the TIME_SERIES_MONTHLY tool
-const timeSeriesMonthlyHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const timeSeriesMonthlyHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   try {
-    // Removed datatype from input destructuring
     const { symbol, limit } = input;
 
-    const baseUrl = 'https://www.alphavantage.co/query';
-    const params = new URLSearchParams({
-      function: 'TIME_SERIES_MONTHLY',
+    const apiRequestParams: AlphaVantageApiParams = {
+      apiFunction: 'TIME_SERIES_MONTHLY',
       symbol,
-      apikey: apiKey,
-      datatype: 'json', // Hardcoded datatype to 'json'
-    });
+      datatype: 'json',
+    };
 
-    const url = `${baseUrl}?${params.toString()}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
-    }
-
-    // Removed CSV handling logic
-
-    // Handle JSON response
-    const data = await response.json();
-
-    // Check for Alpha Vantage API errors (e.g., API limit, invalid parameters)
-    if (data['Error Message']) {
-      throw new Error(`Alpha Vantage API Error: ${data['Error Message']}`);
-    }
-    if (data['Note']) {
-      console.warn(`Alpha Vantage API Note: ${data['Note']}`);
-    }
+    const data = await client.fetchApiData(apiRequestParams);
 
     // Find the time series key (e.g., 'Monthly Time Series')
     const timeSeriesKey = Object.keys(data).find((key) => key.includes('Time Series'));
@@ -82,12 +61,10 @@ const timeSeriesMonthlyHandler = async (input: Input, apiKey: string): Promise<O
         : {}),
     };
 
-    // Return the potentially limited data, wrapping is handled by wrapToolHandler
     return limitedData;
   } catch (error: unknown) {
     console.error('TIME_SERIES_MONTHLY tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
-    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`TIME_SERIES_MONTHLY tool failed: ${message}`);
   }
 };
@@ -97,10 +74,9 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
-// Export the tool definition for TIME_SERIES_MONTHLY
 export const timeSeriesMonthlyTool: AlphaVantageToolDefinition = {
   name: 'time_series_monthly',
   description: 'Fetches monthly OHLCV time series for a given stock/equity.',

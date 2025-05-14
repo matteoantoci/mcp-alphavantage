@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { registerTools } from './tools/index.js'; // This will register all tools from sub-indices
+import { createAlphaVantageClient } from './alphaVantageClient.js';
 
 const main = async () => {
   const apiKey = process.env.ALPHAVANTAGE_API_KEY;
@@ -17,8 +18,11 @@ const main = async () => {
     // Add authentication if needed
   });
 
-  // Register all tools from the different API groups
-  registerTools(server, apiKey);
+  // Create the Alpha Vantage client with cache config
+  const alphaVantageClient = createAlphaVantageClient(apiKey, { max: 500, defaultTTL: 60 * 60 * 1000 });
+
+  // Register all tools from the different API groups, passing the client
+  registerTools(server, alphaVantageClient);
 
   console.log('Starting MCP Alpha Vantage Server...');
   // Use Stdio transport to connect

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 // Define the input schema shape for the EARNINGS_CALL_TRANSCRIPT tool
 const earningsCallTranscriptInputSchemaShape = {
@@ -12,47 +13,23 @@ type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any; // TODO: Define a more specific output type based on Alpha Vantage response
 
 // Define the handler function for the EARNINGS_CALL_TRANSCRIPT tool
-const earningsCallTranscriptHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const earningsCallTranscriptHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   try {
-    // Removed datatype from input destructuring
     const { symbol, quarter } = input;
 
-    const baseUrl = 'https://www.alphavantage.co/query';
-    const params = new URLSearchParams({
-      function: 'EARNINGS_CALL_TRANSCRIPT',
+    const apiRequestParams: AlphaVantageApiParams = {
+      apiFunction: 'EARNINGS_CALL_TRANSCRIPT',
       symbol,
       quarter,
-      apikey: apiKey,
-      datatype: 'json', // Hardcoded datatype to 'json'
-    });
+      datatype: 'json',
+    };
 
-    const url = `${baseUrl}?${params.toString()}`;
+    const data = await client.fetchApiData(apiRequestParams);
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
-    }
-
-    // Removed CSV handling logic
-
-    // Handle JSON response
-    const data = await response.json();
-
-    // Check for Alpha Vantage API errors (e.g., API limit, invalid parameters)
-    if (data['Error Message']) {
-      throw new Error(`Alpha Vantage API Error: ${data['Error Message']}`);
-    }
-    if (data['Note']) {
-      console.warn(`Alpha Vantage API Note: ${data['Note']}`);
-    }
-
-    // Return raw data, wrapping is handled by wrapToolHandler
     return data;
   } catch (error: unknown) {
     console.error('EARNINGS_CALL_TRANSCRIPT tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
-    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`EARNINGS_CALL_TRANSCRIPT tool failed: ${message}`);
   }
 };
@@ -62,10 +39,9 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
-// Export the tool definition for EARNINGS_CALL_TRANSCRIPT
 export const earningsCallTranscriptTool: AlphaVantageToolDefinition = {
   name: 'earnings_call_transcript',
   description: 'Fetches the earnings call transcript for a given company in a specific quarter.',

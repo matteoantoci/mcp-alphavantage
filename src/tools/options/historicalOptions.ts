@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import BigNumber from 'bignumber.js';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 // Utility function to pipe data through a series of functions
 const pipe = <T>(initialValue: T, ...fns: Array<(value: T) => T>): T =>
@@ -199,10 +200,12 @@ const applyStrikeProximityFilter = (
   const uniqueStrikes = Array.from(new Set(data.map((item: OptionDataItem) => new BigNumber(item.strike))));
 
   // Calculate difference and sort by difference
-  const strikesWithDiff = uniqueStrikes.map((strike) => ({
-    strike,
-    diff: strike.minus(currentPrice).abs(),
-  })).sort((a, b) => a.diff.minus(b.diff).toNumber());
+  const strikesWithDiff = uniqueStrikes
+    .map((strike) => ({
+      strike,
+      diff: strike.minus(currentPrice).abs(),
+    }))
+    .sort((a, b) => a.diff.minus(b.diff).toNumber());
 
   // Take the top N strikes based on proximity count
   const numStrikesToInclude = 2 * strikePriceProximityCount + 1;
@@ -214,11 +217,11 @@ const applyStrikeProximityFilter = (
 };
 
 // Define the handler function for the HISTORICAL_OPTIONS tool
-const historicalOptionsHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const historicalOptionsHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   try {
     const {
       symbol,
-      date: inputDateParam, // Renamed to avoid conflict with item.date
+      date: inputDateParam,
       strike_price_proximity_count,
       current_stock_price,
       expiration_months_offset,
@@ -227,41 +230,19 @@ const historicalOptionsHandler = async (input: Input, apiKey: string): Promise<O
       option_type,
     } = input;
 
-    const baseUrl = 'https://www.alphavantage.co/query';
-    const params = new URLSearchParams({
-      function: 'HISTORICAL_OPTIONS',
+    const apiRequestParams: AlphaVantageApiParams = {
+      apiFunction: 'HISTORICAL_OPTIONS',
       symbol,
-      apikey: apiKey,
-      datatype: 'json', // Hardcoded datatype to 'json'
-    });
-
+      datatype: 'json',
+    };
     if (inputDateParam) {
-      params.append('date', inputDateParam);
+      apiRequestParams.date = inputDateParam;
     }
 
-    const url = `${baseUrl}?${params.toString()}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
-    }
-
-    const apiResponseJson = await response.json();
+    const apiResponseJson = await client.fetchApiData(apiRequestParams);
 
     // Log the raw API response data for debugging
     console.log('Raw Alpha Vantage API Response Data:', JSON.stringify(apiResponseJson, null, 2));
-
-    // Check for Alpha Vantage API errors (e.g., API limit, invalid parameters)
-    // These are now primarily handled by getInformativeMessage if data.data is missing
-    if (apiResponseJson['Error Message'] && apiResponseJson.data && Array.isArray(apiResponseJson.data)) {
-      // If data.data IS present, but there's still an error message, throw it.
-      throw new Error(`Alpha Vantage API Error: ${apiResponseJson['Error Message']}`);
-    }
-    if (apiResponseJson['Note'] && apiResponseJson.data && Array.isArray(apiResponseJson.data)) {
-      // If data.data IS present, but there's a note, log it.
-      console.warn(`Alpha Vantage API Note: ${apiResponseJson['Note']}`);
-    }
 
     // Check if data.data exists and is an array before proceeding
     if (!apiResponseJson.data || !Array.isArray(apiResponseJson.data)) {
@@ -299,7 +280,7 @@ const historicalOptionsHandler = async (input: Input, apiKey: string): Promise<O
     // Return filtered data
     return {
       endpoint: apiResponseJson.endpoint,
-      message: getInformativeMessage(apiResponseJson), // Use helper for success message too if appropriate
+      message: getInformativeMessage(apiResponseJson),
       data: finalFilteredData,
       filtered_count: finalFilteredData.length,
       total_count: originalData.length,
@@ -316,10 +297,9 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
-// Export the tool definition for HISTORICAL_OPTIONS
 export const historicalOptionsTool: AlphaVantageToolDefinition = {
   name: 'historical_options',
   description:

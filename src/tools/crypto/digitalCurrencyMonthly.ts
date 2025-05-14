@@ -1,22 +1,19 @@
 import { z } from 'zod';
+import { type AlphaVantageApiParams, AlphaVantageClient } from '../../alphaVantageClient.js';
 
 const inputSchema = z.object({
   symbol: z.string().min(1).describe('The digital/crypto currency symbol (e.g., LTC).'),
   market: z.string().min(1).describe('The exchange market (e.g., GBP, CAD).'),
 });
 
-// Modify handler to accept apiKey as a parameter
-const handler = async (input: z.infer<typeof inputSchema>, apiKey: string) => {
+const handler = async (input: z.infer<typeof inputSchema>, client: AlphaVantageClient) => {
   const { symbol, market } = input;
-  const url = `https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_MONTHLY&symbol=${encodeURIComponent(
-    symbol
-  )}&market=${encodeURIComponent(market)}&apikey=${apiKey}`;
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Alpha Vantage API request failed with status ${response.status}`);
-  }
-  const data = await response.json();
+  const apiRequestParams: AlphaVantageApiParams = {
+    apiFunction: 'DIGITAL_CURRENCY_MONTHLY',
+    symbol,
+    market,
+  };
+  const data = await client.fetchApiData(apiRequestParams);
   if (data['Error Message']) {
     throw new Error(data['Error Message']);
   }

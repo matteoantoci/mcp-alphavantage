@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { type AlphaVantageApiParams, AlphaVantageClient } from '../../alphaVantageClient.js';
 
 const inputSchema = z.object({
   from_currency: z
@@ -8,16 +9,14 @@ const inputSchema = z.object({
   to_currency: z.string().min(1).describe('The destination currency for the exchange rate (e.g., EUR, JPY).'),
 });
 
-// Modify handler to accept apiKey as a parameter
-const handler = async (input: z.infer<typeof inputSchema>, apiKey: string) => {
+const handler = async (input: z.infer<typeof inputSchema>, client: AlphaVantageClient) => {
   const { from_currency, to_currency } = input;
-  const url = `https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${encodeURIComponent(from_currency)}&to_currency=${encodeURIComponent(to_currency)}&apikey=${apiKey}`;
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Alpha Vantage API request failed with status ${response.status}`);
-  }
-  const data = await response.json();
+  const apiRequestParams: AlphaVantageApiParams = {
+    apiFunction: 'CURRENCY_EXCHANGE_RATE',
+    from_currency,
+    to_currency,
+  };
+  const data = await client.fetchApiData(apiRequestParams);
   if (data['Error Message']) {
     throw new Error(data['Error Message']);
   }

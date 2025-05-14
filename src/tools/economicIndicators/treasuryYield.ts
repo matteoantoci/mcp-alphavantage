@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 const treasuryYieldInputSchemaShape = {
   interval: z
@@ -11,7 +12,6 @@ const treasuryYieldInputSchemaShape = {
     .optional()
     .default('10year')
     .describe('3month, 2year, 5year, 7year, 10year, or 30year (default: 10year)'),
-  // Removed datatype parameter
   limit: z
     .number()
     .int()
@@ -24,21 +24,15 @@ type RawSchemaShape = typeof treasuryYieldInputSchemaShape;
 type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any;
 
-const treasuryYieldHandler = async (input: Input, apiKey: string): Promise<Output> => {
-  // Removed datatype from input destructuring
+const treasuryYieldHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   const { interval, maturity, limit } = input;
-  const params = new URLSearchParams({
-    function: 'TREASURY_YIELD',
-    apikey: apiKey,
+  const apiRequestParams: AlphaVantageApiParams = {
+    apiFunction: 'TREASURY_YIELD',
     interval,
     maturity,
-    datatype: 'json', // Hardcoded datatype to 'json'
-  });
-  const url = `https://www.alphavantage.co/query?${params.toString()}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`API request failed: ${response.statusText}`);
-  // Removed CSV handling logic
-  const data = await response.json();
+    datatype: 'json',
+  };
+  let data = await client.fetchApiData(apiRequestParams);
   if (data['Error Message']) throw new Error(data['Error Message']);
 
   // Apply limit if provided
@@ -46,7 +40,6 @@ const treasuryYieldHandler = async (input: Input, apiKey: string): Promise<Outpu
     data.data = data.data.slice(0, limit);
   }
 
-  // Return raw data, wrapping is handled by wrapToolHandler
   return data;
 };
 
@@ -54,7 +47,7 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
 export const treasuryYieldTool: AlphaVantageToolDefinition = {

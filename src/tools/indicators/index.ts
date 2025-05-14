@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { wrapToolHandler } from '../wrapToolHandler.js'; // Import the wrapper
+import type { AlphaVantageClient } from '../../alphaVantageClient.js';
 // Import individual tool definitions for indicators
 import { smaTool } from './sma.js';
 import { emaTool } from './ema.js';
@@ -15,70 +16,70 @@ import { aroonTool } from './aroon.js';
 /**
  * Registers all Alpha Vantage Technical Indicators tools with the MCP server.
  * @param server The McpServer instance.
- * @param apiKey The Alpha Vantage API key.
+ * @param client The Alpha Vantage client instance.
  */
-export const registerIndicatorsTools = (server: McpServer, apiKey: string): void => {
+export const registerIndicatorsTools = (server: McpServer, client: AlphaVantageClient): void => {
   console.log('Registering Alpha Vantage Technical Indicators tools...');
   // Register individual tools
   server.tool(
     smaTool.name,
     smaTool.description,
     smaTool.inputSchemaShape,
-    wrapToolHandler(smaTool.name, (input) => smaTool.handler(input, apiKey))
+    wrapToolHandler((input) => smaTool.handler(input, client))
   );
   server.tool(
     emaTool.name,
     emaTool.description,
     emaTool.inputSchemaShape,
-    wrapToolHandler(emaTool.name, (input) => emaTool.handler(input, apiKey))
+    wrapToolHandler((input) => emaTool.handler(input, client))
   );
   server.tool(
     rsiTool.name,
     rsiTool.description,
     rsiTool.inputSchemaShape,
-    wrapToolHandler(rsiTool.name, (input) => rsiTool.handler(input, apiKey))
+    wrapToolHandler((input) => rsiTool.handler(input, client))
   );
   server.tool(
     bbandsTool.name,
     bbandsTool.description,
     bbandsTool.inputSchemaShape,
-    wrapToolHandler(bbandsTool.name, (input) => bbandsTool.handler(input, apiKey))
+    wrapToolHandler((input) => bbandsTool.handler(input, client))
   );
   server.tool(
     adxTool.name,
     adxTool.description,
     adxTool.inputSchemaShape,
-    wrapToolHandler(adxTool.name, (input) => adxTool.handler(input, apiKey))
+    wrapToolHandler((input) => adxTool.handler(input, client))
   );
   server.tool(
     obvTool.name,
     obvTool.description,
     obvTool.inputSchemaShape,
-    wrapToolHandler(obvTool.name, (input) => obvTool.handler(input, apiKey))
+    wrapToolHandler((input) => obvTool.handler(input, client))
   );
   server.tool(
     atrTool.name,
     atrTool.description,
     atrTool.inputSchemaShape,
-    wrapToolHandler(atrTool.name, (input) => atrTool.handler(input, apiKey))
+    wrapToolHandler((input) => atrTool.handler(input, client))
   );
   server.tool(
     adTool.name,
     adTool.description,
     adTool.inputSchemaShape,
-    wrapToolHandler(adTool.name, (input) => adTool.handler(input, apiKey))
+    wrapToolHandler((input) => adTool.handler(input, client))
   );
   server.tool(
     stochTool.name,
     stochTool.description,
     stochTool.inputSchemaShape,
-    wrapToolHandler(stochTool.name, (input) => stochTool.handler(input, apiKey))
+    wrapToolHandler((input) => stochTool.handler(input, client))
   );
   server.tool(
     aroonTool.name,
     aroonTool.description,
     aroonTool.inputSchemaShape,
-    wrapToolHandler(aroonTool.name, (input) => aroonTool.handler(input, apiKey))
+    wrapToolHandler((input) => aroonTool.handler(input, client))
   );
 
   console.log('Finished registering Alpha Vantage Technical Indicators tools.');

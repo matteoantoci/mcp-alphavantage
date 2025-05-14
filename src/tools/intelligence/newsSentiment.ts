@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 // Define the input schema shape for the NEWS_SENTIMENT tool
 const newsSentimentInputSchemaShape = {
@@ -34,60 +35,36 @@ type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any; // TODO: Define a more specific output type based on Alpha Vantage response
 
 // Define the handler function for the NEWS_SENTIMENT tool
-const newsSentimentHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const newsSentimentHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   try {
-    // Removed datatype from input destructuring
     const { tickers, topics, time_from, time_to, sort, limit } = input;
 
-    const baseUrl = 'https://www.alphavantage.co/query';
-    const params = new URLSearchParams({
-      function: 'NEWS_SENTIMENT',
-      apikey: apiKey,
+    const apiRequestParams: AlphaVantageApiParams = {
+      apiFunction: 'NEWS_SENTIMENT',
       sort,
-      limit: limit.toString(),
-      datatype: 'json', // Hardcoded datatype to 'json'
-    });
+      limit: limit?.toString() ?? '50',
+      datatype: 'json',
+    };
 
     if (tickers) {
-      params.append('tickers', tickers);
+      apiRequestParams.tickers = tickers;
     }
     if (topics) {
-      params.append('topics', topics);
+      apiRequestParams.topics = topics;
     }
     if (time_from) {
-      params.append('time_from', time_from);
+      apiRequestParams.time_from = time_from;
     }
     if (time_to) {
-      params.append('time_to', time_to);
+      apiRequestParams.time_to = time_to;
     }
 
-    const url = `${baseUrl}?${params.toString()}`;
+    const data = await client.fetchApiData(apiRequestParams);
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
-    }
-
-    // Removed CSV handling logic
-
-    // Handle JSON response
-    const data = await response.json();
-
-    // Check for Alpha Vantage API errors (e.g., API limit, invalid parameters)
-    if (data['Error Message']) {
-      throw new Error(`Alpha Vantage API Error: ${data['Error Message']}`);
-    }
-    if (data['Note']) {
-      console.warn(`Alpha Vantage API Note: ${data['Note']}`);
-    }
-
-    // Return raw data, wrapping is handled by wrapToolHandler
     return data;
   } catch (error: unknown) {
     console.error('NEWS_SENTIMENT tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
-    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`NEWS_SENTIMENT tool failed: ${message}`);
   }
 };
@@ -97,10 +74,9 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
-// Export the tool definition for NEWS_SENTIMENT
 export const newsSentimentTool: AlphaVantageToolDefinition = {
   name: 'news_sentiment',
   description: 'Fetches live and historical market news & sentiment data.',

@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { wrapToolHandler } from '../wrapToolHandler.js'; // Import the wrapper
+import type { AlphaVantageClient } from '../../alphaVantageClient.js';
 // Import individual tool definitions for fundamentals
 import { companyOverviewTool } from './companyOverview.js';
 import { etfProfileTool } from './etfProfile.js';
@@ -16,76 +17,76 @@ import { ipoCalendarTool } from './ipoCalendar.js';
 /**
  * Registers all Alpha Vantage Fundamentals tools with the MCP server.
  * @param server The McpServer instance.
- * @param apiKey The Alpha Vantage API key.
+ * @param client The Alpha Vantage client instance.
  */
-export const registerFundamentalsTools = (server: McpServer, apiKey: string): void => {
+export const registerFundamentalsTools = (server: McpServer, client: AlphaVantageClient): void => {
   console.log('Registering Alpha Vantage Fundamentals tools...');
   // Register individual tools
   server.tool(
     companyOverviewTool.name,
     companyOverviewTool.description,
     companyOverviewTool.inputSchemaShape,
-    wrapToolHandler(companyOverviewTool.name, (input) => companyOverviewTool.handler(input, apiKey))
+    wrapToolHandler((input) => companyOverviewTool.handler(input, client))
   );
   server.tool(
     etfProfileTool.name,
     etfProfileTool.description,
     etfProfileTool.inputSchemaShape,
-    wrapToolHandler(etfProfileTool.name, (input) => etfProfileTool.handler(input, apiKey))
+    wrapToolHandler((input) => etfProfileTool.handler(input, client))
   );
   server.tool(
     dividendsTool.name,
     dividendsTool.description,
     dividendsTool.inputSchemaShape,
-    wrapToolHandler(dividendsTool.name, (input) => dividendsTool.handler(input, apiKey))
+    wrapToolHandler((input) => dividendsTool.handler(input, client))
   );
   server.tool(
     splitsTool.name,
     splitsTool.description,
     splitsTool.inputSchemaShape,
-    wrapToolHandler(splitsTool.name, (input) => splitsTool.handler(input, apiKey))
+    wrapToolHandler((input) => splitsTool.handler(input, client))
   );
   server.tool(
     incomeStatementTool.name,
     incomeStatementTool.description,
     incomeStatementTool.inputSchemaShape,
-    wrapToolHandler(incomeStatementTool.name, (input) => incomeStatementTool.handler(input, apiKey))
+    wrapToolHandler((input) => incomeStatementTool.handler(input, client))
   );
   server.tool(
     balanceSheetTool.name,
     balanceSheetTool.description,
     balanceSheetTool.inputSchemaShape,
-    wrapToolHandler(balanceSheetTool.name, (input) => balanceSheetTool.handler(input, apiKey))
+    wrapToolHandler((input) => balanceSheetTool.handler(input, client))
   );
   server.tool(
     cashFlowTool.name,
     cashFlowTool.description,
     cashFlowTool.inputSchemaShape,
-    wrapToolHandler(cashFlowTool.name, (input) => cashFlowTool.handler(input, apiKey))
+    wrapToolHandler((input) => cashFlowTool.handler(input, client))
   );
   server.tool(
     earningsTool.name,
     earningsTool.description,
     earningsTool.inputSchemaShape,
-    wrapToolHandler(earningsTool.name, (input) => earningsTool.handler(input, apiKey))
+    wrapToolHandler((input) => earningsTool.handler(input, client))
   );
   server.tool(
     listingStatusTool.name,
     listingStatusTool.description,
     listingStatusTool.inputSchemaShape,
-    wrapToolHandler(listingStatusTool.name, (input) => listingStatusTool.handler(input, apiKey))
+    wrapToolHandler((input) => listingStatusTool.handler(input, client))
   );
   server.tool(
     earningsCalendarTool.name,
     earningsCalendarTool.description,
     earningsCalendarTool.inputSchemaShape,
-    wrapToolHandler(earningsCalendarTool.name, (input) => earningsCalendarTool.handler(input, apiKey))
+    wrapToolHandler((input) => earningsCalendarTool.handler(input, client))
   );
   server.tool(
     ipoCalendarTool.name,
     ipoCalendarTool.description,
     ipoCalendarTool.inputSchemaShape,
-    wrapToolHandler(ipoCalendarTool.name, (input) => ipoCalendarTool.handler(input, apiKey))
+    wrapToolHandler((input) => ipoCalendarTool.handler(input, client))
   );
 
   console.log('Finished registering Alpha Vantage Fundamentals tools.');

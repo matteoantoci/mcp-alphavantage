@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 // Define the input schema shape for the INSIDER_TRANSACTIONS tool
 const insiderTransactionsInputSchemaShape = {
@@ -80,41 +81,20 @@ const filterTransactionsByDate = (transactions: any[], startDate?: string, endDa
 };
 
 // Define the handler function for the INSIDER_TRANSACTIONS tool
-const insiderTransactionsHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const insiderTransactionsHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   try {
     const { symbol, startDate, endDate } = input;
 
-    const baseUrl = 'https://www.alphavantage.co/query';
-    const params = new URLSearchParams({
-      function: 'INSIDER_TRANSACTIONS',
+    const apiRequestParams: AlphaVantageApiParams = {
+      apiFunction: 'INSIDER_TRANSACTIONS',
       symbol,
-      apikey: apiKey,
       datatype: 'json',
-    });
+    };
 
-    const url = `${baseUrl}?${params.toString()}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
-    }
-
-    const apiResponse = await response.json();
-
-    if (apiResponse['Error Message']) {
-      throw new Error(`Alpha Vantage API Error: ${apiResponse['Error Message']}`);
-    }
-    if (apiResponse['Note']) {
-      console.warn(`Alpha Vantage API Note: ${apiResponse['Note']}`);
-      // If a note is present (e.g. API limit), actual data might be missing.
-      // extractTransactionsList will handle returning [] if data is not found.
-    }
+    const apiResponse = await client.fetchApiData(apiRequestParams);
 
     const transactionsList = extractTransactionsList(apiResponse);
 
-    // If the API returned a note (e.g. rate limit) and no actual data,
-    // and filtering was requested, transactionsList would be empty.
-    // Returning an empty array is appropriate.
     if (transactionsList.length === 0 && (startDate || endDate)) {
       return [];
     }
@@ -132,10 +112,9 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
-// Export the tool definition for INSIDER_TRANSACTIONS
 export const insiderTransactionsTool: AlphaVantageToolDefinition = {
   name: 'insider_transactions',
   description: 'Fetches the latest and historical insider transactions for a company.',

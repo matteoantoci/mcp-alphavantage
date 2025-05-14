@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 // Define the input schema shape for the TIME_SERIES_INTRADAY tool
 const timeSeriesIntradayInputSchemaShape = {
@@ -56,50 +57,26 @@ type TimeSeriesOutput = {
 
 type Output = TimeSeriesOutput;
 
-// Define the handler function for the TIME_SERIES_INTRADAY tool
-const timeSeriesIntradayHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const timeSeriesIntradayHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   try {
-    // Removed datatype from input destructuring
     const { symbol, interval, adjusted, extended_hours, month, outputsize, limit } = input;
 
-    const baseUrl = 'https://www.alphavantage.co/query';
-    const params = new URLSearchParams({
-      function: 'TIME_SERIES_INTRADAY',
+    // Build API params for AlphaVantageClient
+    const apiRequestParams: AlphaVantageApiParams = {
+      apiFunction: 'TIME_SERIES_INTRADAY',
       symbol,
       interval,
-      apikey: apiKey,
-      adjusted: adjusted.toString(),
-      extended_hours: extended_hours.toString(),
-      outputsize,
-      datatype: 'json', // Hardcoded datatype to 'json'
-    });
-
+      adjusted: String(adjusted),
+      extended_hours: String(extended_hours),
+      outputsize: outputsize,
+      datatype: 'json',
+    };
     if (month) {
-      params.append('month', month);
+      apiRequestParams.month = month;
     }
 
-    const url = `${baseUrl}?${params.toString()}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
-    }
-
-    // Removed CSV handling logic
-
-    // Handle JSON response
-    const data = await response.json();
-
-    // Check for Alpha Vantage API errors (e.g., API limit, invalid parameters)
-    if (data['Error Message']) {
-      throw new Error(`Alpha Vantage API Error: ${data['Error Message']}`);
-    }
-    if (data['Note']) {
-      console.warn(`Alpha Vantage API Note: ${data['Note']}`);
-      // Depending on the note, you might want to handle it differently
-      // For now, just log and proceed
-    }
+    // Fetch data using the shared client
+    const data = await client.fetchApiData(apiRequestParams);
 
     // Find the time series key (e.g., 'Time Series (5min)')
     const timeSeriesKey = Object.keys(data).find((key) => key.includes('Time Series'));
@@ -115,25 +92,21 @@ const timeSeriesIntradayHandler = async (input: Input, apiKey: string): Promise<
         : {}),
     };
 
-    // Return the potentially limited data, wrapping is handled by wrapToolHandler
     return limitedData;
   } catch (error: unknown) {
     console.error('TIME_SERIES_INTRADAY tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
-    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`TIME_SERIES_INTRADAY tool failed: ${message}`);
   }
 };
 
-// Define the tool definition object structure
 type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
-// Export the tool definition for TIME_SERIES_INTRADAY
 export const timeSeriesIntradayTool: AlphaVantageToolDefinition = {
   name: 'time_series_intraday',
   description: 'Fetches current and historical intraday OHLCV time series for a given stock/equity.',

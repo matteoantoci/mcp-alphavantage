@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 // Define the input schema shape for the ETF_PROFILE tool
 const etfProfileInputSchemaShape = {
@@ -11,46 +12,22 @@ type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any; // TODO: Define a more specific output type based on Alpha Vantage response
 
 // Define the handler function for the ETF_PROFILE tool
-const etfProfileHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const etfProfileHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   try {
-    // Removed datatype from input destructuring
     const { symbol } = input;
 
-    const baseUrl = 'https://www.alphavantage.co/query';
-    const params = new URLSearchParams({
-      function: 'ETF_PROFILE',
+    const apiRequestParams: AlphaVantageApiParams = {
+      apiFunction: 'ETF_PROFILE',
       symbol,
-      apikey: apiKey,
-      datatype: 'json', // Hardcoded datatype to 'json'
-    });
+      datatype: 'json',
+    };
 
-    const url = `${baseUrl}?${params.toString()}`;
+    const data = await client.fetchApiData(apiRequestParams);
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
-    }
-
-    // Removed CSV handling logic
-
-    // Handle JSON response
-    const data = await response.json();
-
-    // Check for Alpha Vantage API errors (e.g., API limit, invalid parameters)
-    if (data['Error Message']) {
-      throw new Error(`Alpha Vantage API Error: ${data['Error Message']}`);
-    }
-    if (data['Note']) {
-      console.warn(`Alpha Vantage API Note: ${data['Note']}`);
-    }
-
-    // Return raw data, wrapping is handled by wrapToolHandler
     return data;
   } catch (error: unknown) {
     console.error('ETF_PROFILE tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
-    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`ETF_PROFILE tool failed: ${message}`);
   }
 };
@@ -60,10 +37,9 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
-// Export the tool definition for ETF_PROFILE
 export const etfProfileTool: AlphaVantageToolDefinition = {
   name: 'etf_profile',
   description: 'Fetches key ETF metrics and holdings.',

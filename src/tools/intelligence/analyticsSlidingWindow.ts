@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 // Define the input schema shape for the ANALYTICS_SLIDING_WINDOW tool
 const analyticsSlidingWindowInputSchemaShape = {
@@ -36,53 +37,31 @@ type Input = z.infer<z.ZodObject<RawSchemaShape>>;
 type Output = any; // TODO: Define a more specific output type based on Alpha Vantage response
 
 // Define the handler function for the ANALYTICS_SLIDING_WINDOW tool
-const analyticsSlidingWindowHandler = async (input: Input, apiKey: string): Promise<Output> => {
+const analyticsSlidingWindowHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
   try {
-    // Removed datatype from input destructuring
     const { symbols, range, interval, ohlc, window_size, calculations } = input;
 
-    const baseUrl = 'https://www.alphavantage.co/query';
-    const params = new URLSearchParams({
-      function: 'ANALYTICS_SLIDING_WINDOW',
+    const apiRequestParams: AlphaVantageApiParams = {
+      apiFunction: 'ANALYTICS_SLIDING_WINDOW',
       SYMBOLS: symbols,
       INTERVAL: interval,
       OHLC: ohlc,
       WINDOW_SIZE: window_size.toString(),
-      CALCULATIONS: calculations.join(','), // Join array of calculations into comma-separated string
-      apikey: apiKey,
-      datatype: 'json', // Hardcoded datatype to 'json'
-    });
+      CALCULATIONS: calculations.join(','),
+      datatype: 'json',
+    };
 
     // Add range parameters - can be one or two
-    range.forEach((r) => params.append('RANGE', r));
-
-    const url = `${baseUrl}?${params.toString()}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
+    if (Array.isArray(range)) {
+      apiRequestParams.RANGE = range.join(',');
     }
 
-    // Removed CSV handling logic
+    const data = await client.fetchApiData(apiRequestParams);
 
-    // Handle JSON response
-    const data = await response.json();
-
-    // Check for Alpha Vantage API errors (e.g., API limit, invalid parameters)
-    if (data['Error Message']) {
-      throw new Error(`Alpha Vantage API Error: ${data['Error Message']}`);
-    }
-    if (data['Note']) {
-      console.warn(`Alpha Vantage API Note: ${data['Note']}`);
-    }
-
-    // Return raw data, wrapping is handled by wrapToolHandler
     return data;
   } catch (error: unknown) {
     console.error('ANALYTICS_SLIDING_WINDOW tool error:', error);
     const message = error instanceof Error ? error.message : 'An unknown error occurred.';
-    // Throw the error, wrapping is handled by wrapToolHandler
     throw new Error(`ANALYTICS_SLIDING_WINDOW tool failed: ${message}`);
   }
 };
@@ -92,10 +71,9 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
-// Export the tool definition for ANALYTICS_SLIDING_WINDOW
 export const analyticsSlidingWindowTool: AlphaVantageToolDefinition = {
   name: 'analytics_sliding_window',
   description: 'Fetches advanced analytics metrics for a given time series over sliding time windows.',

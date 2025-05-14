@@ -1,8 +1,8 @@
 import { z } from 'zod';
+import type { AlphaVantageClient, AlphaVantageApiParams } from '../../alphaVantageClient.js';
 
 const durablesInputSchemaShape = {
-  // Removed datatype parameter
-  limit: z // Added limit parameter
+  limit: z
     .number()
     .int()
     .positive()
@@ -26,26 +26,19 @@ type DurablesApiResponse = {
 
 type Output = DurablesApiResponse;
 
-const durablesHandler = async (input: Input, apiKey: string): Promise<Output> => {
-  // Removed datatype from input destructuring
-  const { limit } = input; // Destructure limit
-  const params = new URLSearchParams({
-    function: 'DURABLES',
-    apikey: apiKey,
-    datatype: 'json', // Hardcoded datatype to 'json'
-  });
-  const url = `https://www.alphavantage.co/query?${params.toString()}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`API request failed: ${response.statusText}`);
-  // Removed CSV handling logic
-  const data = await response.json();
+const durablesHandler = async (input: Input, client: AlphaVantageClient): Promise<Output> => {
+  const { limit } = input;
+  const apiRequestParams: AlphaVantageApiParams = {
+    apiFunction: 'DURABLES',
+    datatype: 'json',
+  };
+  const data = await client.fetchApiData(apiRequestParams);
   if (data['Error Message']) throw new Error(data['Error Message']);
 
   // Apply limit if provided without mutating original data
   const resultData =
     limit !== undefined && data.data && Array.isArray(data.data) ? { ...data, data: data.data.slice(0, limit) } : data;
 
-  // Return processed data, wrapping is handled by wrapToolHandler
   return resultData;
 };
 
@@ -53,7 +46,7 @@ type AlphaVantageToolDefinition = {
   name: string;
   description: string;
   inputSchemaShape: RawSchemaShape;
-  handler: (input: Input, apiKey: string) => Promise<Output>;
+  handler: (input: Input, client: AlphaVantageClient) => Promise<Output>;
 };
 
 export const durablesTool: AlphaVantageToolDefinition = {
