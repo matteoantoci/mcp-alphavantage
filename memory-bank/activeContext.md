@@ -2,7 +2,7 @@
 
 ### Current Work Focus
 
-The primary focus has been on refactoring and enhancing specific tools. The `earningsCallTranscript.ts` tool has been significantly updated with new filtering capabilities and improved code structure. Work also continues on the broader architectural refactor involving the `AlphaVantageClient`.
+The primary focus has been on refactoring and enhancing specific tools. The `earningsCallTranscript.ts` tool has been significantly updated with new filtering capabilities and improved code structure. Work also continues on the broader architectural refactor involving the `AlphaVantageClient`. Additionally, enhancements are being made to economic indicator tools, specifically adding client-side filtering.
 
 ### Recent Changes
 
@@ -23,6 +23,10 @@ The primary focus has been on refactoring and enhancing specific tools. The `ear
     *   Ensured adherence to functional programming principles (immutability, `const`, `map`/`filter`/`reduce`).
     *   Updated Zod input and output schemas for the tool.
     *   Confirmed `npm run lint` passes for the modified file.
+- **Enhanced `federalFundsRate.ts` tool:**
+    *   Added optional `startDate` and `endDate` parameters to the input schema for client-side date filtering.
+    *   Implemented client-side filtering logic in the handler using immutable operations to filter the data based on the provided dates after applying the `limit`.
+    *   Defined a specific TypeScript interface (`FederalFundsRateDataPoint`) and type (`FederalFundsRateOutput`) for the tool's output to improve type safety.
 
 ### Next Steps
 

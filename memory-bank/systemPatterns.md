@@ -20,6 +20,7 @@ The Alpha Vantage MCP server follows a modular architecture designed for scalabi
 - **Index Files:** Index files (`index.ts`) within each category directory and the main `src/tools/index.ts` file are used to register and export tools, simplifying the server's main entry point (`src/index.ts`).
 - **Dependency Injection:** All tool handlers receive the shared `AlphaVantageClient` instance as a parameter, promoting testability and separation of concerns.
 - **Client-Level Caching:** Caching is handled exclusively by the `AlphaVantageClient`. The previous cache service and caching logic in `wrapToolHandler.ts` have been removed.
+- **Client-Side Filtering:** For Alpha Vantage API endpoints that do not support native filtering for certain parameters (e.g., date ranges), filtering is implemented client-side within the tool handlers using immutable operations.
 
 ## Component Relationships
 

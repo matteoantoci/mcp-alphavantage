@@ -21,7 +21,11 @@
         - Refactored to use pure helper functions for each filtering step, promoting a functional programming style.
         - Input and output schemas have been updated to reflect these changes.
         - Placeholder filters (`context_sentences`, `return_summary`, `summary_detail`) have been removed.
-        - `npm run lint` passes for this tool.
+        - `npm run lint` passes for the modified file.
+    - **Enhanced `federalFundsRate.ts` tool:**
+        *   Added optional `startDate` and `endDate` parameters to the input schema for client-side date filtering.
+        *   Implemented client-side filtering logic in the handler using immutable operations to filter the data based on the provided dates after applying the `limit`.
+        *   Defined a specific TypeScript interface (`FederalFundsRateDataPoint`) and type (`FederalFundsRateOutput`) for the tool's output to improve type safety.
 - **Centralized Caching Mechanism**:
     - An LRU (Least Recently Used) cache is now implemented at the `AlphaVantageClient` level (`src/alphaVantageClient.ts`).
     - All tool handlers use the shared client, which manages caching based solely on API parameters.

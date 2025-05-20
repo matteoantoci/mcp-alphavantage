@@ -38,4 +38,4 @@
 
 - **Dependency Injection:** All tool handlers receive the shared `AlphaVantageClient` instance, promoting testability and separation of concerns.
 - **Centralized Caching:** The previous `cacheService.ts` and caching logic in `wrapToolHandler.ts` have been removed. All caching is now handled by the client, keyed by API parameters only.
-- **Client-Side Filtering:** Where necessary, client-side filtering is performed after retrieving the raw API response from the cache or API (e.g., for date filtering in `insiderTransactions`).
+- **Client-Side Filtering:** Where necessary, client-side filtering is performed after retrieving the raw API response from the cache or API (e.g., for date filtering in `insiderTransactions` and `federalFundsRate`). This is done using immutable operations to maintain data integrity.
